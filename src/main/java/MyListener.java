@@ -14,20 +14,25 @@ public class MyListener extends ListenerAdapter {
         String content = message.getContentRaw();
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        if (content.equals("!ping"))
-        {
+        if (content.equals("!ping")) {
             MessageChannel channel = event.getChannel();
             channel.sendMessage("Pong!").queue(); // Important to call .queue() on the RestAction returned by sendMessage(...)
         }
 
-        if (event.isFromType(ChannelType.TEXT))
-        {
+        if (event.isFromType(ChannelType.TEXT)) {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     event.getChannel().getName(), event.getAuthor(), event.getMessage().getContentDisplay());
         }
-        else
-        {
+
+        if (event.isFromType(ChannelType.PRIVATE)) {
             System.out.printf("[PM] %#s: %s%n", event.getAuthor(), event.getMessage().getContentDisplay());
+            String privateMessage = event.getMessage().getContentRaw();
+            if(privateMessage.contains("@bsu.edu")) {
+                //String[] separatedWords = privateMessage.split(" ");
+                MessageChannel channel = event.getChannel();
+                channel.sendMessage("Sending a confirmation email to " + privateMessage).queue();
+                channel.sendMessage("Please reply with the confirmation code sent to your email").queue();
+            }
         }
 
     }

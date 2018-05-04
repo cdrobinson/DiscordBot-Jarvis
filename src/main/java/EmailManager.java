@@ -3,8 +3,8 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
-public class EmailManager {
-    private static void sendEmail(String recipientEmail, String emailText) {
+class EmailManager {
+    String sendConfirmationEmail(String recipientEmail, String emailText) {
 
         // Sender's email ID needs to be mentioned
         String from = "ballstateesports@gmail.com";
@@ -40,7 +40,7 @@ public class EmailManager {
                     InternetAddress.parse(recipientEmail));
 
             // Set Subject: header field
-            message.setSubject("Testing Subject");
+            message.setSubject("Cardinal Esports - Confirmation Code");
 
             // Now set the actual message
             message.setText(emailText);
@@ -49,9 +49,10 @@ public class EmailManager {
             Transport.send(message);
 
             System.out.println("Sent message successfully....");
+            return "Message sent";
 
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            return e.toString();
         }
     }
 }
