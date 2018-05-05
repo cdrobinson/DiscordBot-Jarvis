@@ -1,7 +1,9 @@
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 public class MyListener extends ListenerAdapter {
@@ -9,7 +11,7 @@ public class MyListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
-        // We don't want to respond to other bot accounts, including ourself
+        // We don't want to respond to other bot accounts, including ourselves
         Message message = event.getMessage();
         String content = message.getContentRaw();
         // getContentRaw() is an atomic getter
@@ -23,20 +25,27 @@ public class MyListener extends ListenerAdapter {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     event.getChannel().getName(), event.getAuthor(), event.getMessage().getContentDisplay());
         }
+    }
 
-        if (event.isFromType(ChannelType.PRIVATE)) {
-            System.out.printf("[PM] %#s: %s%n", event.getAuthor(), event.getMessage().getContentDisplay());
-            String privateMessage = event.getMessage().getContentRaw();
-            if(privateMessage.contains("@bsu.edu")) {
-                //String[] separatedWords = privateMessage.split(" ");
-                MessageChannel channel = event.getChannel();
-                channel.sendMessage("Sending a confirmation email to " + privateMessage).queue();
-                channel.sendMessage("Please reply with the confirmation code sent to your email").queue();
-                EmailManager emailManager = new EmailManager();
-                CodeGenerator codeGen = new CodeGenerator();
-                emailManager.sendConfirmationEmail(privateMessage, emailManager.buildConfirmationEmail(codeGen.generateEmailCode()));
-            }
+    @Override
+    public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
+        if (event.getAuthor().isBot()) return;
+        System.out.printf("[PM] %#s: %s%n", event.getAuthor(), event.getMessage().getContentDisplay());
+        String privateMessage = event.getMessage().getContentRaw();
+        if(privateMessage.contains("@bsu.edu")) {
+            //String[] separatedWords = privateMessage.split(" ");
+            MessageChannel channel = event.getChannel();
+            channel.sendMessage("Sending a confirmation email to " + privateMessage).queue();
+            channel.sendMessage("Please reply with the confirmation code sent to your email").queue();
+            EmailManager emailManager = new EmailManager();
+            CodeGenerator codeGen = new CodeGenerator();
+            String generatedCode = codeGen.generateEmailCode();
+            emailManager.sendConfirmationEmail(privateMessage, emailManager.buildConfirmationEmail(generatedCode));
         }
+    }
 
+    @Override
+    public void onReady(ReadyEvent event) {
+        System.out.println("Charlie Cardinal reporting for duty!");
     }
 }
