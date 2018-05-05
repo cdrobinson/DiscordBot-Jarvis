@@ -32,6 +32,9 @@ public class MyListener extends ListenerAdapter {
                 MessageChannel channel = event.getChannel();
                 channel.sendMessage("Sending a confirmation email to " + privateMessage).queue();
                 channel.sendMessage("Please reply with the confirmation code sent to your email").queue();
+                EmailManager emailManager = new EmailManager();
+                CodeGenerator codeGen = new CodeGenerator();
+                emailManager.sendConfirmationEmail(privateMessage, emailManager.buildConfirmationEmail(codeGen.generateEmailCode()));
             }
         }
 

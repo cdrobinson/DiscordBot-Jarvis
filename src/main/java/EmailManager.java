@@ -55,4 +55,9 @@ class EmailManager {
             return e.toString();
         }
     }
+
+    String buildConfirmationEmail(String confirmationCode) {
+        return "Hello Cardinal! \nPlease PM your confirmation code back to the Charlie Cardinal bot." +
+                "\nHere is your confirmation code: " + confirmationCode;
+    }
 }
