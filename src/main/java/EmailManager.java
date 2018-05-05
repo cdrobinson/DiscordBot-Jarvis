@@ -4,7 +4,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 class EmailManager {
-    String sendConfirmationEmail(String recipientEmail, String emailText) {
+    static String sendConfirmationEmail(String recipientEmail, String emailText) {
 
         // Sender's email ID needs to be mentioned
         String from = "ballstateesports@gmail.com";
@@ -52,13 +52,14 @@ class EmailManager {
             return "Message sent";
 
         } catch (MessagingException e) {
+            System.out.println(e.toString());
             return e.toString();
         }
     }
 
-    String buildConfirmationEmail(String confirmationCode) {
+    static String buildConfirmationEmail(String confirmationCode) {
         return "Hello Cardinal! " +
-                "\nPlease PM your confirmation code back to the Charlie Cardinal bot." +
-                "\nHere is your confirmation code: " + confirmationCode;
+                "\nPlease PM your confirmation message back to the Charlie Cardinal bot." +
+                "\nHere is your confirmation message: ConfirmationCode" + confirmationCode;
     }
 }

@@ -1,7 +1,7 @@
 import java.util.Random;
 
 class CodeGenerator {
-    String generate(int codeLength, int numberFloor, int numberCeiling) {
+    static String generate(int codeLength, int numberFloor, int numberCeiling) {
         Random rand = new Random();
         StringBuilder generatedCode = new StringBuilder();
         for (int i = 0; i < codeLength; i++) {
@@ -10,7 +10,7 @@ class CodeGenerator {
         return generatedCode.toString();
     }
 
-    String generateEmailCode(){
+    static String generateEmailCode(){
         return generate(6, 0, 9);
     }
 }
