@@ -6,18 +6,18 @@ public class EmailTests {
     @Test
     public void testBuildConfirmationEmail(){
         EmailManager mailer = new EmailManager();
-        String bodyText = mailer.buildConfirmationEmail("Confirmation Code");
-        Assert.assertEquals("Hello Cardinal! \n Please PM your confirmation code back to the Charlie Cardinal bot." +
-                "\n Here is your confirmation code: Confirmation Code", bodyText);
+        String bodyText = EmailManager.buildConfirmationEmail("ConfirmationCode");
+        Assert.assertEquals("Hello Cardinal! \nPlease PM your confirmation message back to the Charlie Cardinal bot." +
+                "\nHere is your confirmation message: ConfirmationCodeConfirmationCode", bodyText);
     }
 
     @Test
     public void testBuildConfirmationEmailWithGenerator(){
         EmailManager mailer = new EmailManager();
         CodeGenerator codeGen = new CodeGenerator();
-        String code = codeGen.generateEmailCode();
-        String bodyText = mailer.buildConfirmationEmail(code);
-        Assert.assertEquals("Hello Cardinal! \n Please PM your confirmation code back to the Charlie Cardinal bot." +
-                "\n Here is your confirmation code: " +code, bodyText);
+        String code = CodeGenerator.generateEmailCode();
+        String bodyText = EmailManager.buildConfirmationEmail(code);
+        Assert.assertEquals("Hello Cardinal! \nPlease PM your confirmation message back to the Charlie Cardinal bot." +
+                "\nHere is your confirmation message: ConfirmationCode" +code, bodyText);
     }
 }
