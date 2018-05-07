@@ -48,7 +48,7 @@ class EmailManager {
             // Send message
             Transport.send(message);
 
-            System.out.println("Sent message successfully....");
+            System.out.println("[Confirmation Code] Sent confirmation code successfully to " + recipientEmail);
             return "Message sent";
 
         } catch (MessagingException e) {

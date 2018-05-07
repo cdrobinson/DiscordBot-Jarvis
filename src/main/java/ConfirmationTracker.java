@@ -7,7 +7,11 @@ class ConfirmationTracker {
     private HashMap<User, String> confirmationMap;
 
     ConfirmationTracker() {
-        this.confirmationMap = new HashMap();
+        this.confirmationMap = new HashMap<>();
+    }
+
+    HashMap<User, String> getMap(){
+        return this.confirmationMap;
     }
 
     void addConfirmation(User username, String confirmationCode) {
@@ -15,6 +19,7 @@ class ConfirmationTracker {
     }
 
     String checkListByUser(User username){
+        //Returns the confirmation code
         return this.confirmationMap.get(username);
     }
 

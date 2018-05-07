@@ -1,14 +1,20 @@
 import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import java.util.HashMap;
+
+
 public class MyListener extends ListenerAdapter {
 
     private ConfirmationTracker confirmationTracker;
+
+    MyListener() {
+        this.confirmationTracker = new ConfirmationTracker();
+    }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -47,20 +53,27 @@ public class MyListener extends ListenerAdapter {
             EmailManager.sendConfirmationEmail(privateMessage, EmailManager.buildConfirmationEmail(generatedCode));
             confirmationTracker.addConfirmation(event.getAuthor(), generatedCode);
         }
-        //TODO fix the hashmap so that it accepts Users and stores the data for when the user sends back the confirmation message
         if(privateMessage.contains("ConfirmationCode")) {
-            if (confirmationTracker.checkListByUser(event.getAuthor()).equals(null)) {
-                channel.sendMessage("The confirmation code you entered could not be found.").queue();
-            } else {
-                channel.sendMessage("Your BSU email has been confirmed, your roles have been updated.").queue();
+            String receivedConfirmationCode = event.getMessage().getContentRaw();
+            String[] separatedWords = receivedConfirmationCode.split(" ");
+            if (separatedWords.length > 1) {
+                channel.sendMessage("Please only send me just your confirmation code").queue();
+                return;
+            }
+            String parsedConfirmationCode = receivedConfirmationCode.split("ConfirmationCode")[1];
+            String storedConfirmationCode = confirmationTracker.checkListByUser(event.getAuthor());
+            if(storedConfirmationCode == null) {
+                channel.sendMessage("Your username didn't appear in our databse, please send me your BSU email again.").queue();
+                return;
+            }
+            if(!storedConfirmationCode.equals(parsedConfirmationCode)) {
+                channel.sendMessage("The confirmation code you sent me was incorrect, please recopy the code from your email.").queue();
+                return;
+            }
+            if (parsedConfirmationCode.equals(storedConfirmationCode)) {
+                channel.sendMessage("Thank you for confirming your BSU email.").queue();
                 confirmationTracker.removeConfirmation(event.getAuthor());
             }
         }
-    }
-
-    @Override
-    public void onReady(ReadyEvent event) {
-        System.out.println("Charlie Cardinal reporting for duty!");
-        this.confirmationTracker = new ConfirmationTracker();
     }
 }
