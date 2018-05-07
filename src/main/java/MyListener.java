@@ -5,7 +5,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
-import java.util.HashMap;
 
 
 public class MyListener extends ListenerAdapter {
@@ -63,7 +62,7 @@ public class MyListener extends ListenerAdapter {
             String parsedConfirmationCode = receivedConfirmationCode.split("ConfirmationCode")[1];
             String storedConfirmationCode = confirmationTracker.checkListByUser(event.getAuthor());
             if(storedConfirmationCode == null) {
-                channel.sendMessage("Your username didn't appear in our databse, please send me your BSU email again.").queue();
+                channel.sendMessage("Your username didn't appear in our database, please send me your BSU email again.").queue();
                 return;
             }
             if(!storedConfirmationCode.equals(parsedConfirmationCode)) {
@@ -73,6 +72,7 @@ public class MyListener extends ListenerAdapter {
             if (parsedConfirmationCode.equals(storedConfirmationCode)) {
                 channel.sendMessage("Thank you for confirming your BSU email.").queue();
                 confirmationTracker.removeConfirmation(event.getAuthor());
+                RoleChanger.makeRegisteredUser(event.getAuthor());
             }
         }
     }
