@@ -12,6 +12,6 @@ public class Bot {
         MyListener myListener = new MyListener();
         api.addEventListener(myListener);
         api.setAutoReconnect(true);
-        api.getPresence().setGame(Game.playing("with your tuition money"));
+        api.getPresence().setGame(Game.playing("with your tuition money \nTwitter: @bsuesports"));
     }
 }
