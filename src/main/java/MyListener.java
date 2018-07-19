@@ -47,7 +47,6 @@ public class MyListener extends ListenerAdapter {
         if (content.equalsIgnoreCase("!scotland")) {
             MessageChannel musicChannel = event.getGuild().getTextChannelById("468644546423554068");
             musicChannel.sendMessage("SCOTLAND FOREVER!!!").queue();
-            musicChannel.sendMessage("?play https://www.youtube.com/watch?v=ixMHG0DIAK4").queue();
         }
 
         if (channel.getName().equals("sr-tracking")) {
