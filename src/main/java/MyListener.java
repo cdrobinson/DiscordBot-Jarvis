@@ -11,12 +11,10 @@ import java.util.HashMap;
 
 public class MyListener extends ListenerAdapter {
 
-    private ConfirmationTracker confirmationTracker;
     private SRTracker srTracker;
     private SRSession srSession;
 
     MyListener() {
-        this.confirmationTracker = new ConfirmationTracker();
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
         srTracker.loadSRHistory(parseStorageFile(readFromFile("SRHistory.txt")));
@@ -145,8 +143,6 @@ public class MyListener extends ListenerAdapter {
         }
     }
 
-
-
     private void writeToFile(String textToWrite, String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
@@ -160,7 +156,6 @@ public class MyListener extends ListenerAdapter {
             e.printStackTrace();
         }
     }
-
 
     private String readFromFile(String fileName) {
         try {
@@ -184,47 +179,9 @@ public class MyListener extends ListenerAdapter {
         }
     }
 
-
     @Override
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
         System.out.printf("[PM] %#s: %s%n", event.getAuthor(), event.getMessage().getContentDisplay());
-        String privateMessage = event.getMessage().getContentRaw();
-        MessageChannel channel = event.getChannel();
-        if(privateMessage.contains("@bsu.edu")) {
-            String[] separatedWords = privateMessage.split(" ");
-            if (separatedWords.length > 1) {
-                channel.sendMessage("Please only send me just your Ball State email").queue();
-                return;
-            }
-            channel.sendMessage("Sending a confirmation email to " + privateMessage).queue();
-            channel.sendMessage("Please reply with the confirmation message sent to your email").queue();
-            String generatedCode = CodeGenerator.generateEmailCode();
-            EmailManager.sendConfirmationEmail(privateMessage, EmailManager.buildConfirmationEmail(generatedCode));
-            confirmationTracker.addConfirmation(event.getAuthor(), generatedCode);
-        }
-        if(privateMessage.contains("ConfirmationCode")) {
-            String receivedConfirmationCode = event.getMessage().getContentRaw();
-            String[] separatedWords = receivedConfirmationCode.split(" ");
-            if (separatedWords.length > 1) {
-                channel.sendMessage("Please only send me just your confirmation code").queue();
-                return;
-            }
-            String parsedConfirmationCode = receivedConfirmationCode.split("ConfirmationCode")[1];
-            String storedConfirmationCode = confirmationTracker.checkListByUser(event.getAuthor());
-            if(storedConfirmationCode == null) {
-                channel.sendMessage("Your username didn't appear in our database, please send me your BSU email again.").queue();
-                return;
-            }
-            if(!storedConfirmationCode.equals(parsedConfirmationCode)) {
-                channel.sendMessage("The confirmation code you sent me was incorrect, please recopy the code from your email.").queue();
-                return;
-            }
-            if (parsedConfirmationCode.equals(storedConfirmationCode)) {
-                channel.sendMessage("Thank you for confirming your BSU email.").queue();
-                confirmationTracker.removeConfirmation(event.getAuthor());
-                RoleChanger.makeRegisteredUser(event.getAuthor());
-            }
-        }
     }
 }
