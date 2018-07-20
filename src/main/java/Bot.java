@@ -8,10 +8,10 @@ import javax.security.auth.login.LoginException;
 public class Bot {
 
     public static void main(String[] args) throws LoginException, InterruptedException {
-        JDA api = new JDABuilder(AccountType.BOT).setToken("NDMyNzU1ODM5MzkzMjAyMTg3.DcjmKw.qyehHPgbwLccSw0kTxyGXD9jbKw").buildBlocking();
+        JDA api = new JDABuilder(AccountType.BOT).setToken("NDY5NzI1MzgyODU4MjQ0MDk5.DjL9jQ.NrmqdL4jUiyIknGAtdlpGU_w9_M").buildBlocking();
         MyListener myListener = new MyListener();
         api.addEventListener(myListener);
         api.setAutoReconnect(true);
-        api.getPresence().setGame(Game.playing("with your tuition money"));
+        api.getPresence().setGame(Game.playing("Minecraft VR"));
     }
 }
