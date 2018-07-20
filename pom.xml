@@ -56,7 +56,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <finalName>Charlie Cardinal</finalName>
+                            <finalName>Jarvis</finalName>
 
                         </configuration>
                     </execution>
