@@ -32,7 +32,7 @@ public class MyListener extends ListenerAdapter {
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
         if (event.isFromType(ChannelType.TEXT)) {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
-                    channel.getName(), event.getAuthor(), message.getContentDisplay());
+                    channel.getName(), event.getAuthor(), message.getContentRaw());
         }
         if (content.equalsIgnoreCase("!ping")) {
             channel.sendMessage("Pong!").queue(); // Important to call .queue() on the RestAction returned by sendMessage(...)
@@ -48,6 +48,7 @@ public class MyListener extends ListenerAdapter {
         }
 
         if (channel.getName().equals("sr-tracking")) {
+
             if(content.equalsIgnoreCase("!StartSession")) {
                 String userID = event.getAuthor().getId();
                 Integer startingSR = srTracker.getPlayerSR(userID);
@@ -63,44 +64,68 @@ public class MyListener extends ListenerAdapter {
                 String userID = event.getAuthor().getId();
                 Integer startingSR = srSession.getStartingSR(userID);
                 Integer currentSR = srTracker.getPlayerSR(userID);
-                channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                        "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - startingSR) + "\r------------------------").queue();
+                if (startingSR != null) {
+                    channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
+                            "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - startingSR) + "\r------------------------").queue();
+                } else {
+                    channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
+                }
             }
             if(content.equalsIgnoreCase("!EndSession")) {
                 String userID = event.getAuthor().getId();
                 Integer endingSR = srTracker.getPlayerSR(userID);
                 Integer startingSR = srSession.endSession(userID);
-                channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                        "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
-                writeToFile(srSession.getHistory().toString(), "SRSessions.txt");
+                if (startingSR != null) {
+                    channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
+                            "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
+                    writeToFile(srSession.getHistory().toString(), "SRSessions.txt");
+                } else {
+                    channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
+                }
             }
+
             String[] input = content.split(" ");
+            /*
+            if (input[0].equalsIgnoreCase("!sr")) {
+                String authorID = event.getAuthor().getId();
+                String lookUpID = input[1].substring(3, input[1].length()-1);
+                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
+                Integer authorSR = srTracker.getPlayerSR(authorID);
+                Integer difference = authorSR - lookUpSR;
+                if (difference > 0) {
+                    channel.sendMessage(input[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " less than yours.").queue();
+                } else if (difference < 0) {
+                    channel.sendMessage(input[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " more than yours.").queue();
+                } else {
+                    channel.sendMessage(input[1] + "'s SR is currently " + lookUpSR + " which is the same as yours").queue();
+                }
+            }
+            */
             if (input.length == 1) {
                 try {
                     Integer updatedSR = Integer.parseInt(content);
                     HashMap<String, Integer> srHistory = srTracker.updateSR(event.getAuthor().getId(), updatedSR);
+                    String authorAsMention = event.getAuthor().getAsMention();
                     if (srHistory.get("Difference") > 0) {
                         event.getMessage().addReaction("\uD83D\uDC4D").queue();
                         event.getMessage().addReaction("\uD83D\uDC4C").queue();
-                        channel.sendMessage(event.getAuthor().getAsMention() + "\r------------------------\rNew SR: " + srHistory.get("New SR") +
-                                "\rPrevious SR: " + srHistory.get("Old SR") + "\rDifference: +" + srHistory.get("Difference") + "\r------------------------").queue();
+                        channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "+")).queue();
                         writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
                     } else if (srHistory.get("Difference") < 0) {
                         event.getMessage().addReaction("\uD83D\uDC4E").queue();
                         event.getMessage().addReaction("\uD83D\uDE22").queue();
-                        channel.sendMessage(event.getAuthor().getAsMention() + "\r------------------------\rNew SR: " + srHistory.get("New SR") +
-                                "\rPrevious SR: " + srHistory.get("Old SR") + "\rDifference: " + srHistory.get("Difference") + "\r------------------------").queue();
+                        channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "")).queue();
                         writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
                     } else {
                         event.getMessage().addReaction("\uD83D\uDE10").queue();
                         event.getMessage().addReaction("\uD83E\uDD37").queue();
-                        channel.sendMessage(event.getAuthor().getAsMention() + "\r------------------------\rNew SR: " + srHistory.get("New SR") +
-                                "\rPrevious SR: " + srHistory.get("Old SR") + "\rDifference: " + srHistory.get("Difference") + "\r------------------------").queue();
+                        channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "")).queue();
                         writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
                     }
                 }
                 catch (NumberFormatException e) {
-                    System.out.println();
+                    System.out.println("There was an error in the SR tracking of 1 word posts.");
+                    writeToFile(e.toString(), "ErrorLog.txt");
                 }
             }
         }
@@ -123,6 +148,10 @@ public class MyListener extends ListenerAdapter {
                 }
             }
         }
+    }
+
+    private String buildSRReport(Integer newSR, Integer oldSR, Integer difference, String differencePrefix) {
+        return "\r------------------------\rNew SR: " + newSR + "\rPrevious SR: " + oldSR + "\rDifference: "+ differencePrefix + difference + "\r------------------------";
     }
 
     private HashMap<String, Integer> parseStorageFile(String fileContent) {
@@ -154,6 +183,7 @@ public class MyListener extends ListenerAdapter {
             fileWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
+            writeToFile(e.toString(), "ErrorLog.txt");
         }
     }
 
@@ -171,10 +201,11 @@ public class MyListener extends ListenerAdapter {
             fileReader.close();
             return fileAsString;
         } catch (FileNotFoundException e) {
-            System.out.println("There is currently no " + fileName + " file");
+            System.out.println("There is currently no " + fileName + " file.");
             return null;
         } catch (IOException e) {
             e.printStackTrace();
+            writeToFile(e.toString(), "ErrorLog.txt");
             return null;
         }
     }
