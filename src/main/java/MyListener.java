@@ -74,22 +74,6 @@ public class MyListener extends ListenerAdapter {
             }
 
             String[] input = content.split(" ");
-
-            if (input[0].equalsIgnoreCase("!sr")) {
-                String authorID = event.getAuthor().getId();
-                String lookUpID = input[1].substring(3, input[1].length()-1);
-                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
-                Integer authorSR = srTracker.getPlayerSR(authorID);
-                Integer difference = authorSR - lookUpSR;
-                if (difference > 0) {
-                    channel.sendMessage(input[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " less than yours.").queue();
-                } else if (difference < 0) {
-                    channel.sendMessage(input[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " more than yours.").queue();
-                } else {
-                    channel.sendMessage(input[1] + "'s SR is currently " + lookUpSR + " which is the same as yours").queue();
-                }
-            }
-
             if (input.length == 1 && isInteger(content)) {
                 Integer updatedSR = Integer.parseInt(content);
                 HashMap<String, Integer> srHistory = srTracker.updateSR(event.getAuthor().getId(), updatedSR);
