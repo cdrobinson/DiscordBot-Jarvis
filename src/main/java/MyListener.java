@@ -4,8 +4,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-
-import java.io.*;
 import java.util.HashMap;
 
 
@@ -21,8 +19,6 @@ public class MyListener extends ListenerAdapter {
         this.fileManager = new FileManager();
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
-        srTracker.loadSRHistory(parseStorageFile(fileManager.readFromFile("SRHistory.txt")));
-        srSession.loadSessions(parseStorageFile(fileManager.readFromFile("SRSessions.txt")));
     }
 
     @Override

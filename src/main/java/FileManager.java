@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.HashMap;
 
 class FileManager {
 
@@ -37,6 +38,24 @@ class FileManager {
             e.printStackTrace();
             writeToFile(e.toString(), "ErrorLog.txt");
             return null;
+        }
+    }
+
+    HashMap<String, Integer> parseStorageFile(String fileContent) {
+        if (fileContent != null) {
+            HashMap<String, Integer> parsedContent = new HashMap<>();
+            if(fileContent.length() > 2) {
+                fileContent = fileContent.substring(1, fileContent.length() - 1);
+                String[] contentAsList = fileContent.split(", ");
+
+                for (String listEntry : contentAsList) {
+                    String[] userInfo = listEntry.split("=");
+                    parsedContent.put(userInfo[0], Integer.valueOf(userInfo[1]));
+                }
+            }
+            return parsedContent;
+        } else {
+            return new HashMap<>();
         }
     }
 }
