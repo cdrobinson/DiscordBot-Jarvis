@@ -37,42 +37,6 @@ public class MyListener extends ListenerAdapter {
         commandParser.parseCommand(content, channel, event);
 
         if (channel.getName().equals("sr-tracking")) {
-
-            if(content.equalsIgnoreCase("!StartSession")) {
-                String userID = event.getAuthor().getId();
-                Integer startingSR = srTracker.getPlayerSR(userID);
-                if (startingSR != null) {
-                    channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + startingSR).queue();
-                    srSession.startSession(userID, startingSR);
-                    fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
-                } else {
-                    channel.sendMessage("Please enter a starting SR first.").queue();
-                }
-            }
-            if(content.equalsIgnoreCase("!CurrentSession")) {
-                String userID = event.getAuthor().getId();
-                Integer startingSR = srSession.getStartingSR(userID);
-                Integer currentSR = srTracker.getPlayerSR(userID);
-                if (startingSR != null) {
-                    channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                            "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - startingSR) + "\r------------------------").queue();
-                } else {
-                    channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
-                }
-            }
-            if(content.equalsIgnoreCase("!EndSession")) {
-                String userID = event.getAuthor().getId();
-                Integer endingSR = srTracker.getPlayerSR(userID);
-                Integer startingSR = srSession.endSession(userID);
-                if (startingSR != null) {
-                    channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                            "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
-                    fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
-                } else {
-                    channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
-                }
-            }
-
             String[] input = content.split(" ");
             if (input.length == 1 && isInteger(content)) {
                 Integer updatedSR = Integer.parseInt(content);
