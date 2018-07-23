@@ -68,7 +68,14 @@ class FileManager {
         }catch (IllegalArgumentException e) {
             System.out.printf("There was an error with queueing the %s", fileName);
             e.printStackTrace();
-            return null;
         }
+        try {
+            String fileLocation = System.getProperty("user.dir");
+            return new File(String.format("%s/%s", fileLocation, fileName));
+        }catch (IllegalArgumentException e) {
+            System.out.printf("There was an error with queueing the %s", fileName);
+            e.printStackTrace();
+        }
+        return null;
     }
 }

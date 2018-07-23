@@ -34,7 +34,7 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        commandParser.parseCommand(content, channel, event);
+        commandParser.parseCommand(content, event);
 
         if (channel.getName().equals("sr-tracking")) {
             String[] input = content.split(" ");
@@ -63,21 +63,10 @@ public class MyListener extends ListenerAdapter {
 
         if (event.getAuthor().getId().equals("230347831335059457")) {
             //Save the SR history to file
-            if (content.equals("!savesr")) {
-                channel.sendMessage("Saving SR records to file.").queue();
-                fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
+            if (content.equalsIgnoreCase("!speakas")) {
+
             }
-            //Load the SR history from file
-            if (content.equals("!loadsr")) {
-                channel.sendMessage("Loading SR records from file....").queue();
-                String srHistoryString = fileManager.readFromTextFile("SRHistory.txt");
-                if (srHistoryString != null) {
-                    srTracker.loadSRHistory(parseStorageFile(srHistoryString));
-                    channel.sendMessage("SR records have been loaded.").queue();
-                } else {
-                    channel.sendMessage("The records file could not be located.").queue();
-                }
-            }
+
         }
     }
 

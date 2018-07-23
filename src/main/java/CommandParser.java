@@ -3,7 +3,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 class CommandParser {
 
-    void parseCommand(String content, MessageChannel channel, MessageReceivedEvent event) {
+    void parseCommand(String content, MessageReceivedEvent event) {
         SRTracker srTracker = new SRTracker();
         SRSession srSession = new SRSession();
         FileManager fileManager = new FileManager();
@@ -11,6 +11,7 @@ class CommandParser {
         String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
+        MessageChannel channel = event.getChannel();
 
         switch (command) {
             case "!ping":
