@@ -7,6 +7,8 @@ class SRTracker {
 
     SRTracker() {
         this.srMap = new HashMap<>();
+        FileManager fileManager = new FileManager();
+        loadSRHistory(fileManager.parseStorageFile(fileManager.readFromTextFile("SRHistory.txt")));
     }
 
     HashMap<String, Integer> updateSR(String userID, Integer updatedSR) {
