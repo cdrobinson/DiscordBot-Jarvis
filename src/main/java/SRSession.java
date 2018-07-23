@@ -7,7 +7,7 @@ class SRSession {
     SRSession() {
         this.srSessionMap = new HashMap<>();
         FileManager fileManager = new FileManager();
-        loadSessions(fileManager.parseStorageFile(fileManager.readFromFile("SRSessions.txt")));
+        loadSessions(fileManager.parseStorageFile(fileManager.readFromTextFile("SRSessions.txt")));
     }
 
     void startSession(String userID, Integer startingSR) {

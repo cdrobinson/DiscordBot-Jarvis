@@ -44,7 +44,7 @@ public class MyListener extends ListenerAdapter {
                 if (startingSR != null) {
                     channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + startingSR).queue();
                     srSession.startSession(userID, startingSR);
-                    fileManager.writeToFile(srSession.getHistory().toString(), "SRSessions.txt");
+                    fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                 } else {
                     channel.sendMessage("Please enter a starting SR first.").queue();
                 }
@@ -67,7 +67,7 @@ public class MyListener extends ListenerAdapter {
                 if (startingSR != null) {
                     channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
                             "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
-                    fileManager.writeToFile(srSession.getHistory().toString(), "SRSessions.txt");
+                    fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                 } else {
                     channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
                 }
@@ -82,17 +82,17 @@ public class MyListener extends ListenerAdapter {
                     event.getMessage().addReaction("\uD83D\uDC4D").queue();
                     event.getMessage().addReaction("\uD83D\uDC4C").queue();
                     channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "+")).queue();
-                    fileManager.writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
+                    fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
                 } else if (srHistory.get("Difference") < 0) {
                     event.getMessage().addReaction("\uD83D\uDC4E").queue();
                     event.getMessage().addReaction("\uD83D\uDE22").queue();
                     channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "")).queue();
-                    fileManager.writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
+                    fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
                 } else {
                     event.getMessage().addReaction("\uD83D\uDE10").queue();
                     event.getMessage().addReaction("\uD83E\uDD37").queue();
                     channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "")).queue();
-                    fileManager.writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
+                    fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
                 }
             }
         }
@@ -101,12 +101,12 @@ public class MyListener extends ListenerAdapter {
             //Save the SR history to file
             if (content.equals("!savesr")) {
                 channel.sendMessage("Saving SR records to file.").queue();
-                fileManager.writeToFile(srTracker.getHistory().toString(), "SRHistory.txt");
+                fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
             }
             //Load the SR history from file
             if (content.equals("!loadsr")) {
                 channel.sendMessage("Loading SR records from file....").queue();
-                String srHistoryString = fileManager.readFromFile("SRHistory.txt");
+                String srHistoryString = fileManager.readFromTextFile("SRHistory.txt");
                 if (srHistoryString != null) {
                     srTracker.loadSRHistory(parseStorageFile(srHistoryString));
                     channel.sendMessage("SR records have been loaded.").queue();

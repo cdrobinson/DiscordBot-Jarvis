@@ -29,6 +29,12 @@ class CommandParser {
                 channel.sendMessage("ch-ch-ch CHERRY BOMB!").queue();
                 channel.sendMessage(":cherries::cherries::cherries::cherries::cherries::cherries:").queue();
                 break;
+            case "!damnitjerry":
+                channel.sendFile(fileManager.getFile("jerryPic.jpg")).queue();
+                break;
+            case "!noice":
+                channel.sendFile(fileManager.getFile("noice.jpg")).queue();
+                break;
             case "!sr":
                 String lookUpID = contentString[1].substring(3, contentString[1].length()-1);
                 Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
@@ -49,7 +55,7 @@ class CommandParser {
                         if (startingSR != null) {
                             channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + startingSR).queue();
                             srSession.startSession(authorID, startingSR);
-                            fileManager.writeToFile(srSession.getHistory().toString(), "SRSessions.txt");
+                            fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                         } else {
                             channel.sendMessage("Please enter a starting SR first.").queue();
                         }
@@ -68,7 +74,7 @@ class CommandParser {
                         if (startingSR != null) {
                             channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
                                     "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
-                            fileManager.writeToFile(srSession.getHistory().toString(), "SRSessions.txt");
+                            fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                         } else {
                             channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
                         }

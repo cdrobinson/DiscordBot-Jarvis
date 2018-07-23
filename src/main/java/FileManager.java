@@ -3,7 +3,9 @@ import java.util.HashMap;
 
 class FileManager {
 
-    void writeToFile(String textToWrite, String fileName) {
+
+
+    void writeToTextFile(String textToWrite, String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
             FileWriter fileWriter = new FileWriter(fileLocation + "/" + fileName);
@@ -14,11 +16,11 @@ class FileManager {
             fileWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
-            writeToFile(e.toString(), "ErrorLog.txt");
+            writeToTextFile(e.toString(), "ErrorLog.txt");
         }
     }
 
-    String readFromFile(String fileName) {
+    String readFromTextFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
             FileReader fileReader = new FileReader(fileLocation + "/" + fileName);
@@ -36,7 +38,7 @@ class FileManager {
             return null;
         } catch (IOException e) {
             e.printStackTrace();
-            writeToFile(e.toString(), "ErrorLog.txt");
+            writeToTextFile(e.toString(), "ErrorLog.txt");
             return null;
         }
     }
@@ -56,6 +58,17 @@ class FileManager {
             return parsedContent;
         } else {
             return new HashMap<>();
+        }
+    }
+
+    File getFile(String fileName) {
+        try {
+            String fileLocation = System.getProperty("user.dir");
+            return new File(String.format("%s/%s", fileLocation, fileName));
+        }catch (IllegalArgumentException e) {
+            System.out.printf("There was an error with queueing the %s", fileName);
+            e.printStackTrace();
+            return null;
         }
     }
 }
