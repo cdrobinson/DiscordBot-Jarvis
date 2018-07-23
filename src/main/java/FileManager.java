@@ -1,11 +1,7 @@
-import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.io.*;
 import java.util.HashMap;
 
 class FileManager {
-
-
 
     void writeToTextFile(String textToWrite, String fileName) {
         try {
@@ -65,12 +61,16 @@ class FileManager {
 
     File getFile(String fileName) {
         try {
-            return new File(String.valueOf(ImageIO.read(getClass().getResource("/resources/images/" + fileName))));
+            String fileLocation = System.getProperty("user.dir");
+            File file = new File(fileLocation + "/images/" + fileName);
+            Boolean actualFileExists = file.exists();
+            if(actualFileExists) {
+                return file;
+            } else {
+                System.out.printf("%s does not exist", fileName);
+            }
         }catch (IllegalArgumentException e) {
             System.out.printf("There was an IllegalArgumentException error with queueing the %s", fileName);
-            e.printStackTrace();
-        } catch (IOException e) {
-            System.out.printf("There was an IOException error with queueing the %s\r", fileName);
             e.printStackTrace();
         }
         return null;

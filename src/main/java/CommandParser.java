@@ -1,6 +1,5 @@
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-
 import java.io.File;
 
 class CommandParser {
@@ -33,13 +32,13 @@ class CommandParser {
             case "!damnitjerry":
                 File jerryPic = fileManager.getFile("jerryPic.jpg");
                 if (jerryPic != null) {
-                    channel.sendFile(jerryPic).queue();
+                    channel.sendFile(jerryPic, "jerry.jpg").queue();
                 }
                 break;
             case "!noice":
-                File noice = fileManager.getFile("src/resources/images/noice.jpg");
+                File noice = fileManager.getFile("noice.jpg");
                 if (noice != null) {
-                    channel.sendFile(noice).queue();
+                    channel.sendFile(noice, "noice.jpg").queue();
                 }
                 break;
             case "!sr":
