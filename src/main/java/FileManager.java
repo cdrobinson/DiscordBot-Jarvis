@@ -6,7 +6,7 @@ class FileManager {
     void writeToTextFile(String textToWrite, String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
-            FileWriter fileWriter = new FileWriter(fileLocation + "/" + fileName);
+            FileWriter fileWriter = new FileWriter(fileLocation + "/textFiles/" + fileName);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(textToWrite);
 
@@ -21,7 +21,7 @@ class FileManager {
     String readFromTextFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
-            FileReader fileReader = new FileReader(fileLocation + "/" + fileName);
+            FileReader fileReader = new FileReader(fileLocation + "/textFiles/" + fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             int i;
             String fileAsString = "";

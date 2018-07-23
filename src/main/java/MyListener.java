@@ -67,7 +67,6 @@ public class MyListener extends ListenerAdapter {
                 System.out.println("Stop");
                 //TODO create command that allows me to message people or channels as the bot
             }
-
         }
     }
 
