@@ -3,9 +3,7 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 class CommandParser {
 
-    void parseCommand(String content, MessageReceivedEvent event) {
-        SRTracker srTracker = new SRTracker();
-        SRSession srSession = new SRSession();
+    void parseCommand(String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         FileManager fileManager = new FileManager();
 
         String authorID = event.getAuthor().getId();

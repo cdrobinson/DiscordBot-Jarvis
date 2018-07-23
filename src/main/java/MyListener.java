@@ -34,7 +34,7 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        commandParser.parseCommand(content, event);
+        commandParser.parseCommand(content, event, srSession, srTracker);
 
         if (channel.getName().equals("sr-tracking")) {
             String[] input = content.split(" ");
@@ -64,7 +64,7 @@ public class MyListener extends ListenerAdapter {
         if (event.getAuthor().getId().equals("230347831335059457")) {
             //Save the SR history to file
             if (content.equalsIgnoreCase("!speakas")) {
-
+                System.out.println("Stop");
             }
 
         }
