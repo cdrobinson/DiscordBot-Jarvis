@@ -65,6 +65,7 @@ public class MyListener extends ListenerAdapter {
             //Save the SR history to file
             if (content.equalsIgnoreCase("!speakas")) {
                 System.out.println("Stop");
+                //TODO create command that allows me to message people or channels as the bot
             }
 
         }
