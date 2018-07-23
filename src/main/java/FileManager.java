@@ -1,3 +1,5 @@
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.*;
 import java.util.HashMap;
 
@@ -63,17 +65,12 @@ class FileManager {
 
     File getFile(String fileName) {
         try {
-            String fileLocation = System.getProperty("user.dir");
-            return new File(String.format("%s/src/main/resources/%s", fileLocation, fileName));
+            return new File(String.valueOf(ImageIO.read(getClass().getResource("/resources/images/" + fileName))));
         }catch (IllegalArgumentException e) {
-            System.out.printf("There was an error with queueing the %s", fileName);
+            System.out.printf("There was an IllegalArgumentException error with queueing the %s", fileName);
             e.printStackTrace();
-        }
-        try {
-            String fileLocation = System.getProperty("user.dir");
-            return new File(String.format("%s/%s", fileLocation, fileName));
-        }catch (IllegalArgumentException e) {
-            System.out.printf("There was an error with queueing the %s", fileName);
+        } catch (IOException e) {
+            System.out.printf("There was an IOException error with queueing the %s\r", fileName);
             e.printStackTrace();
         }
         return null;

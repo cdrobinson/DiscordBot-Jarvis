@@ -1,6 +1,8 @@
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.io.File;
+
 class CommandParser {
 
     void parseCommand(String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
@@ -29,10 +31,16 @@ class CommandParser {
                 channel.sendMessage(":cherries::cherries::cherries::cherries::cherries::cherries:").queue();
                 break;
             case "!damnitjerry":
-                channel.sendFile(fileManager.getFile("jerryPic.jpg")).queue();
+                File jerryPic = fileManager.getFile("jerryPic.jpg");
+                if (jerryPic != null) {
+                    channel.sendFile(jerryPic).queue();
+                }
                 break;
             case "!noice":
-                channel.sendFile(fileManager.getFile("noice.jpg")).queue();
+                File noice = fileManager.getFile("src/resources/images/noice.jpg");
+                if (noice != null) {
+                    channel.sendFile(noice).queue();
+                }
                 break;
             case "!sr":
                 String lookUpID = contentString[1].substring(3, contentString[1].length()-1);
