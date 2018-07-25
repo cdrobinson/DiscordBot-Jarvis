@@ -1,6 +1,5 @@
-import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -13,12 +12,14 @@ public class MyListener extends ListenerAdapter {
     private SRTracker srTracker;
     private SRSession srSession;
     private CommandParser commandParser;
+    private JDA jdaApi;
 
-    MyListener() {
+    MyListener(JDA api) {
         this.commandParser = new CommandParser();
         this.fileManager = new FileManager();
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
+        this.jdaApi = api;
     }
 
     @Override
@@ -34,7 +35,7 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        commandParser.parseCommand(content, event, srSession, srTracker);
+        commandParser.parseCommand(content, event, srSession, srTracker, jdaApi);
 
         if (channel.getName().equals("sr-tracking")) {
             String[] input = content.split(" ");
@@ -63,9 +64,12 @@ public class MyListener extends ListenerAdapter {
 
         if (event.getAuthor().getId().equals("230347831335059457")) {
             //Save the SR history to file
-            if (content.equalsIgnoreCase("!speakas")) {
-                System.out.println("Stop");
-                //TODO create command that allows me to message people or channels as the bot
+            //TODO create command that allows me to message people or channels as the bot
+            if (content.contains("!say")) {
+                String[] commandString = content.split("!say");
+                String whatToSay = commandString[1];
+                event.getGuild().getTextChannelById("237059614384848896").sendMessage(whatToSay).queue();
+                System.out.printf("You told me to say: %s", whatToSay);
             }
         }
     }

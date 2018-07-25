@@ -1,7 +1,7 @@
 import java.util.HashMap;
 
 class SRSession {
-
+    //TODO Fix the session not retaining the original SR
     private HashMap<String, Integer> srSessionMap;
 
     SRSession() {
@@ -28,7 +28,7 @@ class SRSession {
         this.srSessionMap = srSessions;
     }
 
-    Integer getStartingSR(String userID) {
-        return this.srSessionMap.get(userID);
+    Integer getStoredSR(String authorID) {
+        return this.srSessionMap.get(authorID);
     }
 }

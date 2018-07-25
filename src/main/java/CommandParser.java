@@ -1,10 +1,12 @@
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.io.File;
 
 class CommandParser {
 
-    void parseCommand(String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
+    void parseCommand(String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker, JDA jdaApi) {
         FileManager fileManager = new FileManager();
 
         String authorID = event.getAuthor().getId();
@@ -23,7 +25,17 @@ class CommandParser {
                 channel.sendMessage(HelpMessageBuilder.getHelpMessage()).queue();
                 break;
             case "!scotland":
-                channel.sendMessage("SCOTLAND FOREVER!!!").queue();
+                MessageBuilder scotlandBuilder = new MessageBuilder();
+                scotlandBuilder.setTTS(true);
+                scotlandBuilder.append("SCOTLAND FOREVER!!!");
+                channel.sendMessage(scotlandBuilder.build()).queue();
+                break;
+            case "!allwomen":
+                MessageBuilder thotBuilder = new MessageBuilder();
+                thotBuilder.setTTS(true);
+                thotBuilder.append("If she breathes, she's a thot!");
+                channel.sendMessage("All women are queens!").queue();
+                channel.sendMessage(thotBuilder.build()).queue();
                 break;
             case "!cherrybomb":
                 channel.sendMessage("ch-ch-ch CHERRY BOMB!").queue();
@@ -39,47 +51,64 @@ class CommandParser {
                 File noice = fileManager.getFile("noice.jpg");
                 if (noice != null) {
                     channel.sendFile(noice, "noice.jpg").queue();
+                    MessageBuilder noiceBuilder = new MessageBuilder();
+                    noiceBuilder.setTTS(true);
+                    noiceBuilder.append("noice");
+                    channel.sendMessage(noiceBuilder.build()).queue();
                 }
                 break;
+            case "!leaderboard":
+                channel.sendMessage(srTracker.getLeaderboard(event.getGuild())).queue();
+                break;
             case "!sr":
-                String lookUpID = contentString[1].substring(3, contentString[1].length()-1);
-                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
-                Integer authorSR = srTracker.getPlayerSR(authorID);
-                Integer difference = authorSR - lookUpSR;
-                if (difference > 0) {
-                    channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " less than yours.").queue();
-                } else if (difference < 0) {
-                    channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " more than yours.").queue();
+                String lookUpID;
+                String tester = contentString[1].substring(2, 3);
+                if (tester.equals("!")) {
+                    lookUpID = contentString[1].substring(3, contentString[1].length()-1);
                 } else {
-                    channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is the same as yours").queue();
+                    lookUpID = contentString[1].substring(2, contentString[1].length()-1);
+                }
+                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
+                if (lookUpSR != null) {
+                    Integer authorSR = srTracker.getPlayerSR(authorID);
+                    Integer difference = authorSR - lookUpSR;
+                    if (difference > 0) {
+                        channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is -" + difference + " less than yours.").queue();
+                    } else if (difference < 0) {
+                        channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is +" + (lookUpSR - authorSR) + " more than yours.").queue();
+                    } else {
+                        channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is the same as yours").queue();
+                    }
+                } else {
+                    channel.sendMessage(contentString[1] + " thinks they are too good for me to track their SR").queue();
                 }
                 break;
             case "!session":
-                Integer startingSR = srTracker.getPlayerSR(authorID);
+                Integer currentSR = srTracker.getPlayerSR(authorID);
+                Integer storedSR = srSession.getStoredSR(authorID);
                 switch (contentString[1]) {
                     case "start":
-                        if (startingSR != null) {
-                            channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + startingSR).queue();
-                            srSession.startSession(authorID, startingSR);
+                        if (currentSR != null) {
+                            channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + currentSR).queue();
+                            srSession.startSession(authorID, currentSR);
                             fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                         } else {
                             channel.sendMessage("Please enter a starting SR first.").queue();
                         }
                         break;
                     case "current":
-                        Integer currentSR = srTracker.getPlayerSR(authorID);
-                        if (startingSR != null) {
-                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                                    "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - startingSR) + "\r------------------------").queue();
+                        if (currentSR != null) {
+                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + storedSR +
+                                    "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - storedSR) + "\r------------------------").queue();
                         } else {
                             channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
                         }
                         break;
                     case "end":
-                        Integer endingSR = srTracker.getPlayerSR(authorID);
-                        if (startingSR != null) {
-                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                                    "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
+                        if (currentSR != null) {
+                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + storedSR +
+                                    "\rEnding SR: " + currentSR + "\rDifference: " + (currentSR - storedSR) + "\r------------------------").queue();
+                            srSession.endSession(authorID);
                             fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                         } else {
                             channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
@@ -90,7 +119,6 @@ class CommandParser {
                         break;
                 }
                 break;
-
         }
     }
 }

@@ -1,5 +1,10 @@
 
-import java.util.HashMap;
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.Guild;
+
+import java.util.*;
+import java.util.Map.Entry;
+
 
 class SRTracker {
 
@@ -33,7 +38,20 @@ class SRTracker {
         return this.srMap;
     }
 
-    void loadSRHistory(HashMap<String, Integer> srHistory) {
+    String getLeaderboard(Guild guild) {
+        Set<Entry<String, Integer>> set = this.srMap.entrySet();
+        List<Entry<String, Integer>> list = new ArrayList<>(set);
+        list.sort((o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
+        String leaderBoard = "=====================\r";
+        for(Map.Entry<String, Integer> entry:list){
+            System.out.println(entry.getKey()+" ==== "+entry.getValue());
+            leaderBoard = leaderBoard.concat(guild.getMemberById(entry.getKey()).getEffectiveName() + " - " + entry.getValue() + "\r");
+        }
+        leaderBoard = leaderBoard.concat("=====================");
+        return leaderBoard;
+    }
+
+    private void loadSRHistory(HashMap<String, Integer> srHistory) {
         this.srMap = srHistory;
     }
 
