@@ -1,7 +1,4 @@
-
-import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
-
 import java.util.*;
 import java.util.Map.Entry;
 

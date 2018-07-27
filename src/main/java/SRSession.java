@@ -14,10 +14,8 @@ class SRSession {
         srSessionMap.put(userID, startingSR);
     }
 
-    Integer endSession(String userID) {
-        Integer startingSR = srSessionMap.get(userID);
+    void endSession(String userID) {
         srSessionMap.remove(userID);
-        return startingSR;
     }
 
     HashMap<String, Integer> getHistory() {
