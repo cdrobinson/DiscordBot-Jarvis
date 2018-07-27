@@ -5,7 +5,6 @@ import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import java.util.HashMap;
 
-
 public class MyListener extends ListenerAdapter {
 
     private FileManager fileManager;
@@ -35,7 +34,7 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        commandParser.parseCommand(content, event, srSession, srTracker, jdaApi);
+        commandParser.parseCommand(jdaApi, content, event, srSession, srTracker);
 
         if (channel.getName().equals("sr-tracking")) {
             String[] input = content.split(" ");
@@ -43,22 +42,20 @@ public class MyListener extends ListenerAdapter {
                 Integer updatedSR = Integer.parseInt(content);
                 HashMap<String, Integer> srHistory = srTracker.updateSR(event.getAuthor().getId(), updatedSR);
                 String authorAsMention = event.getAuthor().getAsMention();
+                SRReporter srReporter = new SRReporter();
+                channel.sendMessage(srReporter.build(authorAsMention, "", "New", srHistory.get("New SR"),
+                        "Previous", srHistory.get("Old SR"), srHistory.get("Difference"))).queue();
                 if (srHistory.get("Difference") > 0) {
                     event.getMessage().addReaction("\uD83D\uDC4D").queue();
                     event.getMessage().addReaction("\uD83D\uDC4C").queue();
-                    channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "+")).queue();
-                    fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
                 } else if (srHistory.get("Difference") < 0) {
                     event.getMessage().addReaction("\uD83D\uDC4E").queue();
                     event.getMessage().addReaction("\uD83D\uDE22").queue();
-                    channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "")).queue();
-                    fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
                 } else {
                     event.getMessage().addReaction("\uD83D\uDE10").queue();
                     event.getMessage().addReaction("\uD83E\uDD37").queue();
-                    channel.sendMessage(authorAsMention + buildSRReport(srHistory.get("New SR"), srHistory.get("Old SR"), srHistory.get("Difference"), "")).queue();
-                    fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
                 }
+                fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
             }
         }
 
@@ -82,10 +79,6 @@ public class MyListener extends ListenerAdapter {
         catch(NumberFormatException e) {
             return false;
         }
-    }
-
-    private String buildSRReport(Integer newSR, Integer oldSR, Integer difference, String differencePrefix) {
-        return "\r------------------------\rNew SR: " + newSR + "\rPrevious SR: " + oldSR + "\rDifference: "+ differencePrefix + difference + "\r------------------------";
     }
 
     @Override

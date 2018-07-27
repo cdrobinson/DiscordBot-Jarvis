@@ -6,17 +6,18 @@ import java.io.File;
 
 class CommandParser {
 
-    void parseCommand(String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker, JDA jdaApi) {
+    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         FileManager fileManager = new FileManager();
 
         String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
         MessageChannel channel = event.getChannel();
+        SRReporter srReporter = new SRReporter();
 
         switch (command) {
             case "!ping":
-                channel.sendMessage("Pong!").queue();
+                channel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();
                 break;
             case "!bing":
                 channel.sendMessage("Bong!").queue();
@@ -69,18 +70,14 @@ class CommandParser {
                     lookUpID = contentString[1].substring(2, contentString[1].length()-1);
                 }
                 Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
+                String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
                 if (lookUpSR != null) {
                     Integer authorSR = srTracker.getPlayerSR(authorID);
                     Integer difference = authorSR - lookUpSR;
-                    if (difference > 0) {
-                        channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is -" + difference + " less than yours.").queue();
-                    } else if (difference < 0) {
-                        channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is +" + (lookUpSR - authorSR) + " more than yours.").queue();
-                    } else {
-                        channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is the same as yours").queue();
-                    }
+                    channel.sendMessage(srReporter.build(lookUpName, "SR Report", lookUpName + "'s", lookUpSR,
+                            "Your", authorSR, difference)).queue();
                 } else {
-                    channel.sendMessage(contentString[1] + " thinks they are too good for me to track their SR").queue();
+                    channel.sendMessage(lookUpName + " thinks they are too good for me to track their SR").queue();
                 }
                 break;
             case "!session":
@@ -98,16 +95,16 @@ class CommandParser {
                         break;
                     case "current":
                         if (currentSR != null) {
-                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + storedSR +
-                                    "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - storedSR) + "\r------------------------").queue();
+                            channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
+                                    "Current", currentSR, (currentSR - storedSR))).queue();
                         } else {
                             channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
                         }
                         break;
                     case "end":
                         if (currentSR != null) {
-                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + storedSR +
-                                    "\rEnding SR: " + currentSR + "\rDifference: " + (currentSR - storedSR) + "\r------------------------").queue();
+                            channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
+                                    "Ending", currentSR, (currentSR - storedSR))).queue();
                             srSession.endSession(authorID);
                             fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                         } else {
