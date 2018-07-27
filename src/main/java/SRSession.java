@@ -1,7 +1,6 @@
 import java.util.HashMap;
 
 class SRSession {
-    //TODO Fix the session not retaining the original SR
     private HashMap<String, Integer> srSessionMap;
 
     SRSession() {
