@@ -2,23 +2,27 @@ import java.util.HashMap;
 
 class SRSession {
     private HashMap<String, Integer> srSessionMap;
+    private FileManager fileManager;
 
     SRSession() {
         this.srSessionMap = new HashMap<>();
-        FileManager fileManager = new FileManager();
+        this.fileManager = new FileManager();
         loadSessions(fileManager.parseStorageFile(fileManager.readFromTextFile("SRSessions.txt")));
     }
 
-    void startSession(String userID, Integer startingSR) {
-        srSessionMap.put(userID, startingSR);
+    Boolean startSession(String userID, Integer startingSR) {
+        if (srSessionMap.get(userID) == null) {
+            srSessionMap.put(userID, startingSR);
+            fileManager.writeToTextFile(srSessionMap.toString(), "SRSessions.txt");
+            return true;
+        } else {
+            return false;
+        }
     }
 
     void endSession(String userID) {
         srSessionMap.remove(userID);
-    }
-
-    HashMap<String, Integer> getHistory() {
-        return this.srSessionMap;
+        fileManager.writeToTextFile(srSessionMap.toString(), "SRSessions.txt");
     }
 
     private void loadSessions(HashMap<String, Integer> srSessions) {

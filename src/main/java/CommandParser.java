@@ -86,9 +86,12 @@ class CommandParser {
                 switch (contentString[1]) {
                     case "start":
                         if (currentSR != null) {
-                            channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + currentSR).queue();
-                            srSession.startSession(authorID, currentSR);
-                            fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
+                            Boolean started = srSession.startSession(authorID, currentSR);
+                            if (started) {
+                                channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + currentSR).queue();
+                            } else {
+                                channel.sendMessageFormat("There is already a session for %s with a starting SR of %s", event.getAuthor().getAsMention(), storedSR).queue();
+                            }
                         } else {
                             channel.sendMessage("Please enter a starting SR first.").queue();
                         }
@@ -106,7 +109,6 @@ class CommandParser {
                             channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
                                     "Ending", currentSR, (currentSR - storedSR))).queue();
                             srSession.endSession(authorID);
-                            fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
                         } else {
                             channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
                         }

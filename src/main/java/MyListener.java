@@ -1,8 +1,11 @@
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+
+import java.io.File;
 import java.util.HashMap;
 
 public class MyListener extends ListenerAdapter {
@@ -31,6 +34,7 @@ public class MyListener extends ListenerAdapter {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
+
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
@@ -43,7 +47,7 @@ public class MyListener extends ListenerAdapter {
                 HashMap<String, Integer> srHistory = srTracker.updateSR(event.getAuthor().getId(), updatedSR);
                 String authorAsMention = event.getAuthor().getAsMention();
                 SRReporter srReporter = new SRReporter();
-                channel.sendMessage(srReporter.build(authorAsMention, "", "New", srHistory.get("New SR"),
+                channel.sendMessage(srReporter.build(authorAsMention, "SR", "New", srHistory.get("New SR"),
                         "Previous", srHistory.get("Old SR"), srHistory.get("Difference"))).queue();
                 if (srHistory.get("Difference") > 0) {
                     event.getMessage().addReaction("\uD83D\uDC4D").queue();
@@ -59,9 +63,27 @@ public class MyListener extends ListenerAdapter {
             }
         }
 
+        if (content.toLowerCase().contains("wow")) {
+            File jerryPic = fileManager.getFile("wow.jpg");
+            if (jerryPic != null) {
+                channel.sendFile(jerryPic, "wow.jpg").queue();
+            }
+        }
+        if (content.toLowerCase().contains("opinion")) {
+            File jerryPic = fileManager.getFile("myOpinion.png");
+            if (jerryPic != null) {
+                channel.sendFile(jerryPic, "myOpinion.png").queue();
+            }
+        }
+        if (content.toLowerCase().contains("women") || content.toLowerCase().contains("girl") || content.toLowerCase().contains("gorl")) {
+            MessageBuilder thotBuilder = new MessageBuilder();
+            thotBuilder.setTTS(true);
+            thotBuilder.append("If she breathes, she's a thot!");
+            channel.sendMessage(thotBuilder.build()).queue();
+        }
+
         if (event.getAuthor().getId().equals("230347831335059457")) {
             //Save the SR history to file
-            //TODO create command that allows me to message people or channels as the bot
             if (content.contains("!say")) {
                 String[] commandString = content.split("!say");
                 String whatToSay = commandString[1];
@@ -70,6 +92,8 @@ public class MyListener extends ListenerAdapter {
             }
         }
     }
+
+
 
     private boolean isInteger(String input) {
         try {
