@@ -58,6 +58,9 @@ class CommandParser {
                     channel.sendMessage(noiceBuilder.build()).queue();
                 }
                 break;
+            case "!leaderboard":
+                channel.sendMessage(srTracker.getLeaderboard(event.getGuild())).queue();
+                break;
             case "wow":
                 File wowPic = fileManager.getFile("wow.jpg");
                 if (wowPic != null) {
@@ -70,13 +73,6 @@ class CommandParser {
                     channel.sendFile(myOpinion, "myOpinion.png").queue();
                 }
                 break;
-            case "no u":
-            case "no you":
-                File noYou = fileManager.getFile("noYou.png");
-                if (noYou != null) {
-                    channel.sendFile(noYou, "noYou.png").queue();
-                }
-                break;
             case "girl":
             case "gorl":
             case "grill":
@@ -87,9 +83,6 @@ class CommandParser {
                 break;
             case "women":
                 channel.sendMessage("All women are queens").queue();
-                break;
-            case "!leaderboard":
-                channel.sendMessage(srTracker.getLeaderboard(event.getGuild())).queue();
                 break;
             case "!sr":
                 String lookUpID;
@@ -147,6 +140,20 @@ class CommandParser {
                         channel.sendMessage("The session command you entered was invalid. Your options are [start, current, end].").queue();
                         break;
                 }
+                break;
+            default:
+                break;
+        }
+        //Multi word commands
+        switch (content.toLowerCase()) {
+            case "no u":
+            case "no you":
+                File noYou = fileManager.getFile("noYou.png");
+                if (noYou != null) {
+                    channel.sendFile(noYou, "noYou.png").queue();
+                }
+                break;
+            default:
                 break;
         }
     }

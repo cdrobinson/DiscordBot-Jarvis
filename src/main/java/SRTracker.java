@@ -39,12 +39,15 @@ class SRTracker {
         Set<Entry<String, Integer>> set = this.srMap.entrySet();
         List<Entry<String, Integer>> list = new ArrayList<>(set);
         list.sort((o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
-        String leaderBoard = "```=====================\r";
-        for(Map.Entry<String, Integer> entry:list){
-            System.out.println(entry.getKey()+" ==== "+entry.getValue());
-            leaderBoard = leaderBoard.concat(guild.getMemberById(entry.getKey()).getEffectiveName() + " - " + entry.getValue() + "\r");
+        String leaderBoard = "=====================\r";
+        for(Map.Entry<String, Integer> entry:list) {
+            try {
+                leaderBoard = leaderBoard.concat(guild.getMemberById(entry.getKey()).getEffectiveName() + " - " + entry.getValue() + "\r");
+            } catch (NullPointerException e) {
+                System.out.printf("There was an error getting the effective name for %s", entry.getKey());
+            }
         }
-        leaderBoard = leaderBoard.concat("=====================```");
+        leaderBoard = leaderBoard.concat("=====================");
         return leaderBoard;
     }
 
