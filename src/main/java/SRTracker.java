@@ -39,12 +39,12 @@ class SRTracker {
         Set<Entry<String, Integer>> set = this.srMap.entrySet();
         List<Entry<String, Integer>> list = new ArrayList<>(set);
         list.sort((o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
-        String leaderBoard = "=====================\r";
+        String leaderBoard = "```=====================\r";
         for(Map.Entry<String, Integer> entry:list){
             System.out.println(entry.getKey()+" ==== "+entry.getValue());
             leaderBoard = leaderBoard.concat(guild.getMemberById(entry.getKey()).getEffectiveName() + " - " + entry.getValue() + "\r");
         }
-        leaderBoard = leaderBoard.concat("=====================");
+        leaderBoard = leaderBoard.concat("=====================```");
         return leaderBoard;
     }
 

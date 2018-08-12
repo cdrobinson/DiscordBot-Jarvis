@@ -62,26 +62,6 @@ public class MyListener extends ListenerAdapter {
                 fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
             }
         }
-
-        if (content.toLowerCase().contains("wow")) {
-            File jerryPic = fileManager.getFile("wow.jpg");
-            if (jerryPic != null) {
-                channel.sendFile(jerryPic, "wow.jpg").queue();
-            }
-        }
-        if (content.toLowerCase().contains("opinion")) {
-            File jerryPic = fileManager.getFile("myOpinion.png");
-            if (jerryPic != null) {
-                channel.sendFile(jerryPic, "myOpinion.png").queue();
-            }
-        }
-        if (content.toLowerCase().contains("women") || content.toLowerCase().contains("girl") || content.toLowerCase().contains("gorl")) {
-            MessageBuilder thotBuilder = new MessageBuilder();
-            thotBuilder.setTTS(true);
-            thotBuilder.append("If she breathes, she's a thot!");
-            channel.sendMessage(thotBuilder.build()).queue();
-        }
-
         if (event.getAuthor().getId().equals("230347831335059457")) {
             //Save the SR history to file
             if (content.contains("!say")) {
@@ -92,8 +72,6 @@ public class MyListener extends ListenerAdapter {
             }
         }
     }
-
-
 
     private boolean isInteger(String input) {
         try {
