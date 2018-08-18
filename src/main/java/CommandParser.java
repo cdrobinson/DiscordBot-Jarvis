@@ -76,6 +76,7 @@ class CommandParser {
             case "girl":
             case "gorl":
             case "grill":
+            case "gurl":
                 channel.sendMessage("If she breathes, she's a thot!").queue();
                 break;
             case "gruhz":
@@ -106,12 +107,16 @@ class CommandParser {
             case "!session":
                 Integer currentSR = srTracker.getPlayerSR(authorID);
                 Integer storedSR = srSession.getStoredSR(authorID);
+                if (contentString.length == 1) {
+                    channel.sendMessage("The session command you entered was invalid. Your options are [start, current, end].").queue();
+                    break;
+                }
                 switch (contentString[1]) {
                     case "start":
                         if (currentSR != null) {
                             Boolean started = srSession.startSession(authorID, currentSR);
                             if (started) {
-                                channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + currentSR).queue();
+                                channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + " with a starting SR of " + currentSR).queue();
                             } else {
                                 channel.sendMessageFormat("There is already a session for %s with a starting SR of %s", event.getAuthor().getAsMention(), storedSR).queue();
                             }
@@ -121,27 +126,33 @@ class CommandParser {
                         break;
                     case "current":
                         if (currentSR != null) {
-                            channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
-                                    "Current", currentSR, (currentSR - storedSR))).queue();
+                            if (srSession.isSessionRunning(authorID)) {
+                                channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
+                                        "Current", currentSR, (currentSR - storedSR))).queue();
+                            } else {
+                                channel.sendMessage("You don't have a session going right now. Type \"!session start\" to begin one.").queue();
+                            }
                         } else {
-                            channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
+                            channel.sendMessage("Please enter a starting SR first.").queue();
                         }
                         break;
                     case "end":
                         if (currentSR != null) {
-                            channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
-                                    "Ending", currentSR, (currentSR - storedSR))).queue();
-                            srSession.endSession(authorID);
+                            if (srSession.isSessionRunning(authorID)) {
+                                channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
+                                        "Ending", currentSR, (currentSR - storedSR))).queue();
+                                srSession.endSession(authorID);
+                            } else {
+                                channel.sendMessage("You don't have a session going right now. Type \"!session start\" to begin one.").queue();
+                            }
                         } else {
-                            channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
+                            channel.sendMessage("Please enter a starting SR first.").queue();
                         }
                         break;
                     default:
                         channel.sendMessage("The session command you entered was invalid. Your options are [start, current, end].").queue();
                         break;
                 }
-                break;
-            default:
                 break;
         }
         //Multi word commands

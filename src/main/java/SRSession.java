@@ -20,6 +20,10 @@ class SRSession {
         }
     }
 
+    Boolean isSessionRunning(String userID) {
+        return srSessionMap.get(userID) != null;
+    }
+
     void endSession(String userID) {
         srSessionMap.remove(userID);
         fileManager.writeToTextFile(srSessionMap.toString(), "SRSessions.txt");
