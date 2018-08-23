@@ -1,9 +1,11 @@
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import java.util.HashMap;
+import java.util.List;
 
 public class MyListener extends ListenerAdapter {
 
@@ -24,6 +26,7 @@ public class MyListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
+        if (event.getGuild().getId().equals("260565533575872512")) return;
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
@@ -66,6 +69,33 @@ public class MyListener extends ListenerAdapter {
                 String whatToSay = commandString[1];
                 event.getGuild().getTextChannelById("237059614384848896").sendMessage(whatToSay).queue();
                 System.out.printf("You told me to say: %s", whatToSay);
+            }
+            if (content.contains("!saveSR")) {
+                fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
+                channel.sendMessage("SR Tracker has been saved to the server.").queue();
+            }
+            if (content.contains("!loadSR")) {
+                srTracker.loadSRHistory(fileManager.parseStorageFile(fileManager.readFromTextFile("SRHistory.txt")));
+                channel.sendMessage("SR Tracker has been loaded from the server.").queue();
+            }
+        }
+    }
+
+    @Override
+    public void onGuildMemberJoin(GuildMemberJoinEvent event) {
+        if (event.getGuild().getId().equals("260565533575872512")) return;
+        //event.getAuthor().openPrivateChannel(.queue((userPM) -> userPM.sendMessage("Message").queue());
+        String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + HelpMessageBuilder.getHelpMessage();
+        event.getMember().getUser().openPrivateChannel().queue((userPM) -> userPM.sendMessage(welcomeMessage).queue());
+        List<Guild> mutualGuilds = event.getUser().getMutualGuilds();
+        for (Guild guild : mutualGuilds) {
+            if (guild.getId().equals("260565533575872512")) {
+                List<Role> userRoles = guild.getMemberById(event.getUser().getId()).getRoles();
+                for (Role role : userRoles) {
+                    if (role.getId().equals("443151138062073866")) {
+                        event.getGuild().getController().addSingleRoleToMember(event.getMember(), event.getGuild().getRoleById("451495511724130305")).queue();
+                    }
+                }
             }
         }
     }

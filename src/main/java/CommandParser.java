@@ -1,8 +1,11 @@
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.io.File;
+import java.util.List;
 
 class CommandParser {
 
@@ -61,11 +64,14 @@ class CommandParser {
             case "!leaderboard":
                 channel.sendMessage(srTracker.getLeaderboard(event.getGuild())).queue();
                 break;
-            case "wow":
+            case "!wow":
                 File wowPic = fileManager.getFile("wow.jpg");
                 if (wowPic != null) {
                     channel.sendFile(wowPic, "wow.jpg").queue();
                 }
+                break;
+            case "wow":
+                event.getMessage().addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
                 break;
             case "opinion":
                 File myOpinion = fileManager.getFile("myOpinion.png");
@@ -102,6 +108,19 @@ class CommandParser {
                             "Your", authorSR, difference)).queue();
                 } else {
                     channel.sendMessage(lookUpName + " thinks they are too good for me to track their SR").queue();
+                }
+                break;
+            case "!chirpchirp":
+                List<Guild> mutualGuilds = event.getMember().getUser().getMutualGuilds();
+                for (Guild guild : mutualGuilds) {
+                    if (guild.getId().equals("260565533575872512")) {
+                        List<Role> userRoles = guild.getMemberById(event.getMember().getUser().getId()).getRoles();
+                        for (Role role : userRoles) {
+                            if (role.getId().equals("443151138062073866")) {
+                                event.getGuild().getController().addSingleRoleToMember(event.getMember(), event.getGuild().getRoleById("451495511724130305")).queue();
+                            }
+                        }
+                    }
                 }
                 break;
             case "!session":
@@ -157,14 +176,18 @@ class CommandParser {
         }
         //Multi word commands
         switch (content.toLowerCase()) {
-            case "no u":
-            case "no you":
+            case "!no u":
+            case "!no you":
                 File noYou = fileManager.getFile("noYou.png");
                 if (noYou != null) {
                     channel.sendFile(noYou, "noYou.png").queue();
                 }
                 break;
             default:
+                break;
+            case "no u":
+            case "no you":
+                event.getMessage().addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
                 break;
         }
     }

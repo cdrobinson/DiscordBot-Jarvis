@@ -2,7 +2,6 @@ import net.dv8tion.jda.core.entities.Guild;
 import java.util.*;
 import java.util.Map.Entry;
 
-
 class SRTracker {
 
     private HashMap<String, Integer> srMap;
@@ -51,7 +50,7 @@ class SRTracker {
         return leaderBoard;
     }
 
-    private void loadSRHistory(HashMap<String, Integer> srHistory) {
+    void loadSRHistory(HashMap<String, Integer> srHistory) {
         this.srMap = srHistory;
     }
 
