@@ -3,12 +3,12 @@ import java.util.HashMap;
 
 class FileManager {
 
-
+    //TODO create resource directories if they don't exist (at least for the textFiles directory, couldn't really do that with the images)
 
     void writeToTextFile(String textToWrite, String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
-            FileWriter fileWriter = new FileWriter(fileLocation + "/" + fileName);
+            FileWriter fileWriter = new FileWriter(fileLocation + "/textFiles/" + fileName);
             BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(textToWrite);
 
@@ -23,7 +23,7 @@ class FileManager {
     String readFromTextFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
-            FileReader fileReader = new FileReader(fileLocation + "/" + fileName);
+            FileReader fileReader = new FileReader(fileLocation + "/textFiles/" + fileName);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             int i;
             String fileAsString = "";
@@ -64,11 +64,17 @@ class FileManager {
     File getFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
-            return new File(String.format("%s/src/main/resources/%s", fileLocation, fileName));
+            File file = new File(fileLocation + "/images/" + fileName);
+            Boolean actualFileExists = file.exists();
+            if(actualFileExists) {
+                return file;
+            } else {
+                System.out.printf("%s does not exist", fileName);
+            }
         }catch (IllegalArgumentException e) {
-            System.out.printf("There was an error with queueing the %s", fileName);
+            System.out.printf("There was an IllegalArgumentException error with queueing the %s", fileName);
             e.printStackTrace();
-            return null;
         }
+        return null;
     }
 }

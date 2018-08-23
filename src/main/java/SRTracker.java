@@ -1,5 +1,6 @@
-
-import java.util.HashMap;
+import net.dv8tion.jda.core.entities.Guild;
+import java.util.*;
+import java.util.Map.Entry;
 
 class SRTracker {
 
@@ -31,6 +32,22 @@ class SRTracker {
 
     HashMap<String, Integer> getHistory() {
         return this.srMap;
+    }
+
+    String getLeaderboard(Guild guild) {
+        Set<Entry<String, Integer>> set = this.srMap.entrySet();
+        List<Entry<String, Integer>> list = new ArrayList<>(set);
+        list.sort((o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
+        String leaderBoard = "=====================\r";
+        for(Map.Entry<String, Integer> entry:list) {
+            try {
+                leaderBoard = leaderBoard.concat(guild.getMemberById(entry.getKey()).getEffectiveName() + " - " + entry.getValue() + "\r");
+            } catch (NullPointerException e) {
+                System.out.printf("There was an error getting the effective name for %s", entry.getKey());
+            }
+        }
+        leaderBoard = leaderBoard.concat("=====================");
+        return leaderBoard;
     }
 
     void loadSRHistory(HashMap<String, Integer> srHistory) {

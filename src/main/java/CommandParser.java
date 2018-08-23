@@ -1,20 +1,26 @@
+import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import java.io.File;
+import java.util.List;
 
 class CommandParser {
 
-    void parseCommand(String content, MessageChannel channel, MessageReceivedEvent event) {
-        SRTracker srTracker = new SRTracker();
-        SRSession srSession = new SRSession();
+    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         FileManager fileManager = new FileManager();
 
         String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
+        MessageChannel channel = event.getChannel();
+        SRReporter srReporter = new SRReporter();
 
         switch (command) {
             case "!ping":
-                channel.sendMessage("Pong!").queue();
+                channel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();
                 break;
             case "!bing":
                 channel.sendMessage("Bong!").queue();
@@ -23,60 +29,143 @@ class CommandParser {
                 channel.sendMessage(HelpMessageBuilder.getHelpMessage()).queue();
                 break;
             case "!scotland":
-                channel.sendMessage("SCOTLAND FOREVER!!!").queue();
+                MessageBuilder scotlandBuilder = new MessageBuilder();
+                scotlandBuilder.setTTS(true);
+                scotlandBuilder.append("SCOTLAND FOREVER!!!");
+                channel.sendMessage(scotlandBuilder.build()).queue();
+                break;
+            case "!allwomen":
+                MessageBuilder thotBuilder = new MessageBuilder();
+                thotBuilder.setTTS(true);
+                thotBuilder.append("If she breathes, she's a thot!");
+                channel.sendMessage("All women are queens!").queue();
+                channel.sendMessage(thotBuilder.build()).queue();
                 break;
             case "!cherrybomb":
                 channel.sendMessage("ch-ch-ch CHERRY BOMB!").queue();
                 channel.sendMessage(":cherries::cherries::cherries::cherries::cherries::cherries:").queue();
                 break;
             case "!damnitjerry":
-                channel.sendFile(fileManager.getFile("jerryPic.jpg")).queue();
+                File jerryPic = fileManager.getFile("jerryPic.jpg");
+                if (jerryPic != null) {
+                    channel.sendFile(jerryPic, "jerry.jpg").queue();
+                }
                 break;
             case "!noice":
-                channel.sendFile(fileManager.getFile("noice.jpg")).queue();
+                File noice = fileManager.getFile("noice.jpg");
+                if (noice != null) {
+                    channel.sendFile(noice, "noice.jpg").queue();
+                    MessageBuilder noiceBuilder = new MessageBuilder();
+                    noiceBuilder.setTTS(true);
+                    noiceBuilder.append("noice");
+                    channel.sendMessage(noiceBuilder.build()).queue();
+                }
+                break;
+            case "!leaderboard":
+                channel.sendMessage(srTracker.getLeaderboard(event.getGuild())).queue();
+                break;
+            case "!wow":
+                File wowPic = fileManager.getFile("wow.jpg");
+                if (wowPic != null) {
+                    channel.sendFile(wowPic, "wow.jpg").queue();
+                }
+                break;
+            case "wow":
+                event.getMessage().addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
+                break;
+            case "opinion":
+                File myOpinion = fileManager.getFile("myOpinion.png");
+                if (myOpinion != null) {
+                    channel.sendFile(myOpinion, "myOpinion.png").queue();
+                }
+                break;
+            case "girl":
+            case "gorl":
+            case "grill":
+            case "gurl":
+                channel.sendMessage("If she breathes, she's a thot!").queue();
+                break;
+            case "gruhz":
+                channel.sendMessage("Fuck off, Oly").queue();
+                break;
+            case "women":
+                channel.sendMessage("All women are queens").queue();
                 break;
             case "!sr":
-                String lookUpID = contentString[1].substring(3, contentString[1].length()-1);
-                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
-                Integer authorSR = srTracker.getPlayerSR(authorID);
-                Integer difference = authorSR - lookUpSR;
-                if (difference > 0) {
-                    channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " less than yours.").queue();
-                } else if (difference < 0) {
-                    channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is " + difference + " more than yours.").queue();
+                String lookUpID;
+                String tester = contentString[1].substring(2, 3);
+                if (tester.equals("!")) {
+                    lookUpID = contentString[1].substring(3, contentString[1].length()-1);
                 } else {
-                    channel.sendMessage(contentString[1] + "'s SR is currently " + lookUpSR + " which is the same as yours").queue();
+                    lookUpID = contentString[1].substring(2, contentString[1].length()-1);
+                }
+                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
+                String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
+                if (lookUpSR != null) {
+                    Integer authorSR = srTracker.getPlayerSR(authorID);
+                    Integer difference = authorSR - lookUpSR;
+                    channel.sendMessage(srReporter.build(lookUpName, "SR Report", lookUpName + "'s", lookUpSR,
+                            "Your", authorSR, difference)).queue();
+                } else {
+                    channel.sendMessage(lookUpName + " thinks they are too good for me to track their SR").queue();
+                }
+                break;
+            case "!chirpchirp":
+                List<Guild> mutualGuilds = event.getMember().getUser().getMutualGuilds();
+                for (Guild guild : mutualGuilds) {
+                    if (guild.getId().equals("260565533575872512")) {
+                        List<Role> userRoles = guild.getMemberById(event.getMember().getUser().getId()).getRoles();
+                        for (Role role : userRoles) {
+                            if (role.getId().equals("443151138062073866")) {
+                                event.getGuild().getController().addSingleRoleToMember(event.getMember(), event.getGuild().getRoleById("451495511724130305")).queue();
+                            }
+                        }
+                    }
                 }
                 break;
             case "!session":
-                Integer startingSR = srTracker.getPlayerSR(authorID);
+                Integer currentSR = srTracker.getPlayerSR(authorID);
+                Integer storedSR = srSession.getStoredSR(authorID);
+                if (contentString.length == 1) {
+                    channel.sendMessage("The session command you entered was invalid. Your options are [start, current, end].").queue();
+                    break;
+                }
                 switch (contentString[1]) {
                     case "start":
-                        if (startingSR != null) {
-                            channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + "with a starting SR of " + startingSR).queue();
-                            srSession.startSession(authorID, startingSR);
-                            fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
+                        if (currentSR != null) {
+                            Boolean started = srSession.startSession(authorID, currentSR);
+                            if (started) {
+                                channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + " with a starting SR of " + currentSR).queue();
+                            } else {
+                                channel.sendMessageFormat("There is already a session for %s with a starting SR of %s", event.getAuthor().getAsMention(), storedSR).queue();
+                            }
                         } else {
                             channel.sendMessage("Please enter a starting SR first.").queue();
                         }
                         break;
                     case "current":
-                        Integer currentSR = srTracker.getPlayerSR(authorID);
-                        if (startingSR != null) {
-                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                                    "\rCurrent SR: " + currentSR + "\rDifference: " + (currentSR - startingSR) + "\r------------------------").queue();
+                        if (currentSR != null) {
+                            if (srSession.isSessionRunning(authorID)) {
+                                channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
+                                        "Current", currentSR, (currentSR - storedSR))).queue();
+                            } else {
+                                channel.sendMessage("You don't have a session going right now. Type \"!session start\" to begin one.").queue();
+                            }
                         } else {
-                            channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
+                            channel.sendMessage("Please enter a starting SR first.").queue();
                         }
                         break;
                     case "end":
-                        Integer endingSR = srTracker.getPlayerSR(authorID);
-                        if (startingSR != null) {
-                            channel.sendMessage(event.getAuthor().getAsMention() + "'s Session Details\r------------------------\rStarting SR: " + startingSR +
-                                    "\rEnding SR: " + endingSR + "\rDifference: " + (endingSR - startingSR) + "\r------------------------").queue();
-                            fileManager.writeToTextFile(srSession.getHistory().toString(), "SRSessions.txt");
+                        if (currentSR != null) {
+                            if (srSession.isSessionRunning(authorID)) {
+                                channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
+                                        "Ending", currentSR, (currentSR - storedSR))).queue();
+                                srSession.endSession(authorID);
+                            } else {
+                                channel.sendMessage("You don't have a session going right now. Type \"!session start\" to begin one.").queue();
+                            }
                         } else {
-                            channel.sendMessage("You don't have a session going right now. Type \"!startSession\" to begin one.").queue();
+                            channel.sendMessage("Please enter a starting SR first.").queue();
                         }
                         break;
                     default:
@@ -84,7 +173,22 @@ class CommandParser {
                         break;
                 }
                 break;
-
+        }
+        //Multi word commands
+        switch (content.toLowerCase()) {
+            case "!no u":
+            case "!no you":
+                File noYou = fileManager.getFile("noYou.png");
+                if (noYou != null) {
+                    channel.sendFile(noYou, "noYou.png").queue();
+                }
+                break;
+            default:
+                break;
+            case "no u":
+            case "no you":
+                event.getMessage().addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
+                break;
         }
     }
 }
