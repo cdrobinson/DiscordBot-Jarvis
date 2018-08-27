@@ -12,13 +12,9 @@ import com.sedmelluq.discord.lavaplayer.source.youtube.YoutubeAudioSourceManager
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.VoiceChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.exceptions.PermissionException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 import java.util.HashMap;
 import java.util.List;
@@ -27,7 +23,7 @@ import java.util.Queue;
 import java.util.logging.Level;
 
 public class MusicPlayerControl extends ListenerAdapter {
-    private static final int DEFAULT_VOLUME = 5; //(0 - 150, where 100 is default max volume)
+    private static final int DEFAULT_VOLUME = 10; //(0 - 150, where 100 is default max volume)
 
     private final AudioPlayerManager playerManager;
     private final Map<String, GuildMusicManager> musicManagers;
@@ -50,9 +46,6 @@ public class MusicPlayerControl extends ListenerAdapter {
     //Prefix for all commands: .
     //Example:  .play
     //Current commands
-    // join [name]  - Joins a voice channel that has the provided name
-    // join [id]    - Joins a voice channel based on the provided id.
-    // leave        - Leaves the voice channel that the bot is currently in.
     // play         - Plays songs from the current queue. Starts playing again if it was previously paused
     // play [url]   - Adds a new song to the queue and starts playing if it wasn't playing already
     // pplay        - Adds a playlist to the queue and starts playing if not already playing
@@ -69,9 +62,8 @@ public class MusicPlayerControl extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (!event.getGuild().getId().equals("237059614384848896")) return;
-        if (!event.getMember().getUser().getId().equals("230347831335059457")) return;
-        if (!event.isFromType(ChannelType.TEXT))
-            return;
+        if (!event.getChannel().getId().equals("468644546423554068")) return;
+        if (!event.getMember().getRoles().contains(event.getGuild().getRoleById("468643508627046400")) || !event.getMember().getRoles().contains(event.getGuild().getRoleById("337737025861976073"))) return;
 
         String[] command = event.getMessage().getContentDisplay().split(" ", 2);
         if (!command[0].startsWith("."))    //message doesn't start with prefix.
@@ -82,37 +74,7 @@ public class MusicPlayerControl extends ListenerAdapter {
         AudioPlayer player = guildMusicManager.player;
         TrackScheduler scheduler = guildMusicManager.scheduler;
 
-        if (".join".equals(command[0])) {
-            if (command.length == 1) { //No channel name was provided to search for.
-                event.getChannel().sendMessage("No channel name was provided to search with to join.").queue();
-            } else {
-                VoiceChannel chan = null;
-                try {
-                    chan = guild.getVoiceChannelById(command[1]);
-                } catch (NumberFormatException ignored) {
-                }
-
-                if (chan == null) {
-                    chan = guild.getVoiceChannelsByName(command[1], true).stream().findFirst().orElse(null);
-                }
-                if (chan == null) {
-                    event.getChannel().sendMessage("Could not find VoiceChannel by name: " + command[1]).queue();
-                } else {
-                    guild.getAudioManager().setSendingHandler(guildMusicManager.sendHandler);
-
-                    try {
-                        guild.getAudioManager().openAudioConnection(chan);
-                    } catch (PermissionException e) {
-                        if (e.getPermission() == Permission.VOICE_CONNECT) {
-                            event.getChannel().sendMessage("Yui does not have permission to connect to: " + chan.getName()).queue();
-                        }
-                    }
-                }
-            }
-        } else if (".leave".equals(command[0])) {
-            guild.getAudioManager().setSendingHandler(null);
-            guild.getAudioManager().closeAudioConnection();
-        } else if (".play".equals(command[0])) {
+        if (".play".equals(command[0])) {
             if (command.length == 1) //It is only the command to start playback (probably after pause)
             {
                 if (player.isPaused()) {
@@ -125,6 +87,8 @@ public class MusicPlayerControl extends ListenerAdapter {
                 }
             } else    //Commands has 2 parts, .play and url.
             {
+                guild.getAudioManager().setSendingHandler(guildMusicManager.sendHandler);
+                guild.getAudioManager().openAudioConnection(event.getMember().getVoiceState().getChannel());
                 loadAndPlay(guildMusicManager, event.getChannel(), command[1], false);
             }
         } else if (".pplay".equals(command[0]) && command.length == 2) {
@@ -137,7 +101,6 @@ public class MusicPlayerControl extends ListenerAdapter {
                 event.getChannel().sendMessage("Cannot pause or resume player because no track is loaded for playing.").queue();
                 return;
             }
-
             player.setPaused(!player.isPaused());
             if (player.isPaused())
                 event.getChannel().sendMessage("The player has been paused.").queue();
@@ -148,6 +111,8 @@ public class MusicPlayerControl extends ListenerAdapter {
             player.stopTrack();
             player.setPaused(false);
             event.getChannel().sendMessage("Playback has been completely stopped and the queue has been cleared.").queue();
+            guild.getAudioManager().setSendingHandler(null);
+            guild.getAudioManager().closeAudioConnection();
         } else if (".volume".equals(command[0])) {
             if (command.length == 1) {
                 event.getChannel().sendMessage("Current player volume: **" + player.getVolume() + "**").queue();
