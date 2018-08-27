@@ -3,8 +3,6 @@ import java.util.HashMap;
 
 class FileManager {
 
-    //TODO create resource directories if they don't exist (at least for the textFiles directory, couldn't really do that with the images)
-
     void writeToTextFile(String textToWrite, String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");

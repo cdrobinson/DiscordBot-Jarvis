@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>us.cdrobinson.discordbot</groupId>
-    <artifactId>DiscordBot</artifactId>
+    <artifactId>JarvisBot</artifactId>
     <version>1.0-SNAPSHOT</version>
     <build>
         <plugins>
@@ -82,8 +82,18 @@
             <id>mvnrepository.com</id>
             <url>mvnrepository.com</url>
         </repository>
+        <repository>
+            <id>central</id>
+            <name>bintray</name>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
     </repositories>
     <dependencies>
+        <dependency>
+            <groupId>com.sedmelluq</groupId>
+            <artifactId>lavaplayer</artifactId>
+            <version>1.3.7</version>
+        </dependency>
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>javax.mail</artifactId>
@@ -92,7 +102,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>3.6.0_361</version>
+            <version>3.7.1_402</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
