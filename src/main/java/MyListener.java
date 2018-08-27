@@ -27,7 +27,7 @@ public class MyListener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
-        if (event.getGuild().getId().equals("260565533575872512")) return;
+        if (!event.getGuild().getId().equals("237059614384848896")) return;
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
