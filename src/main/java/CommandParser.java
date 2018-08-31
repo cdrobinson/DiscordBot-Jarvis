@@ -1,8 +1,6 @@
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.io.File;
 import java.util.List;
@@ -71,7 +69,9 @@ class CommandParser {
                 }
                 break;
             case "wow":
-                event.getMessage().addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
+                for (Message message: event.getChannel().getHistoryBefore(event.getMessageId(), 1).complete().getRetrievedHistory()) {
+                    message.addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
+                }
                 break;
             case "opinion":
                 File myOpinion = fileManager.getFile("myOpinion.png");
@@ -187,7 +187,9 @@ class CommandParser {
                 break;
             case "no u":
             case "no you":
-                event.getMessage().addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
+                for (Message message: event.getChannel().getHistoryBefore(event.getMessageId(), 1).complete().getRetrievedHistory()) {
+                    message.addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
+                }
                 break;
         }
     }

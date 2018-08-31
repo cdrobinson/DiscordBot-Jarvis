@@ -24,7 +24,6 @@ import java.util.logging.Level;
 
 public class MusicPlayerControl extends ListenerAdapter {
     private static final int DEFAULT_VOLUME = 10; //(0 - 150, where 100 is default max volume)
-
     private final AudioPlayerManager playerManager;
     private final Map<String, GuildMusicManager> musicManagers;
 
@@ -92,6 +91,8 @@ public class MusicPlayerControl extends ListenerAdapter {
                 loadAndPlay(guildMusicManager, event.getChannel(), command[1], false);
             }
         } else if (".pplay".equals(command[0]) && command.length == 2) {
+            guild.getAudioManager().setSendingHandler(guildMusicManager.sendHandler);
+            guild.getAudioManager().openAudioConnection(event.getMember().getVoiceState().getChannel());
             loadAndPlay(guildMusicManager, event.getChannel(), command[1], true);
         } else if (".skip".equals(command[0])) {
             scheduler.nextTrack();
