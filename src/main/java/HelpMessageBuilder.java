@@ -4,6 +4,7 @@ class HelpMessageBuilder {
                 "!ping: Pong! [current ping to bot in ms] \r" +
                 "!bing: Bong! \r" +
                 "!help: Shows you this message \r" +
+                "!vote [option1, option2, etc] \r" +
                 "================BSU Students Only================ \r" +
                 "!chirpchirp: Run this command after registering as a BSU student on the Cardinal Esports Discord server\r" +
                 "================These commands must be used in #sr-tracking================\r" +
