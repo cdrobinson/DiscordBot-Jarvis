@@ -123,6 +123,9 @@ class CommandParser {
                     }
                 }
                 break;
+            case "!vote":
+                UserInputManager.createPoll(event);
+                break;
             case "!session":
                 Integer currentSR = srTracker.getPlayerSR(authorID);
                 Integer storedSR = srSession.getStoredSR(authorID);

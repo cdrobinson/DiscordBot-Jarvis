@@ -63,7 +63,7 @@ class FileManager {
         try {
             String fileLocation = System.getProperty("user.dir");
             File file = new File(fileLocation + "/images/" + fileName);
-            Boolean actualFileExists = file.exists();
+            boolean actualFileExists = file.exists();
             if(actualFileExists) {
                 return file;
             } else {
