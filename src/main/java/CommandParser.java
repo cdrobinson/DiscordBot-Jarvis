@@ -9,7 +9,6 @@ class CommandParser {
 
     void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         FileManager fileManager = new FileManager();
-
         String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
@@ -73,23 +72,8 @@ class CommandParser {
                     message.addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
                 }
                 break;
-            case "opinion":
-                File myOpinion = fileManager.getFile("myOpinion.png");
-                if (myOpinion != null) {
-                    channel.sendFile(myOpinion, "myOpinion.png").queue();
-                }
-                break;
-            case "girl":
-            case "gorl":
-            case "grill":
-            case "gurl":
-                channel.sendMessage("If she breathes, she's a thot!").queue();
-                break;
             case "gruhz":
                 channel.sendMessage("Fuck off, Oly").queue();
-                break;
-            case "women":
-                channel.sendMessage("All women are queens").queue();
                 break;
             case "!sr":
                 String lookUpID;
@@ -178,7 +162,7 @@ class CommandParser {
                 break;
         }
         //Multi word commands
-        switch (content.toLowerCase()) {
+        switch (content) {
             case "!no u":
             case "!no you":
                 File noYou = fileManager.getFile("noYou.png");
@@ -186,14 +170,28 @@ class CommandParser {
                     channel.sendFile(noYou, "noYou.png").queue();
                 }
                 break;
-            default:
-                break;
             case "no u":
             case "no you":
                 for (Message message: event.getChannel().getHistoryBefore(event.getMessageId(), 1).complete().getRetrievedHistory()) {
                     message.addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
                 }
                 break;
+            default:
+                break;
+        }
+
+        //Inline commands
+        if (content.contains("girl") || content.contains("grill") || content.contains("gorl") || content.contains("gurl")) {
+            channel.sendMessage("If she breathes, she's a thot!").queue();
+        }
+        if (content.contains("women")) {
+            channel.sendMessage("All women are queens").queue();
+        }
+        if (content.contains("opinion")) {
+            File myOpinion = fileManager.getFile("myOpinion.png");
+            if (myOpinion != null) {
+                channel.sendFile(myOpinion, "myOpinion.png").queue();
+            }
         }
     }
 }
