@@ -7,25 +7,24 @@ import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import java.util.HashMap;
 import java.util.List;
 
 public class MyListener extends ListenerAdapter {
 
-    private FileManager fileManager;
     private SRTracker srTracker;
     private SRSession srSession;
     private CommandParser commandParser;
     private JDA jdaApi;
     private TwitterManager twitterManager;
+    private AdminCommands adminCommands;
 
     MyListener(JDA api) {
         this.commandParser = new CommandParser();
-        this.fileManager = new FileManager();
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
         this.twitterManager = new TwitterManager();
         this.jdaApi = api;
+        this.adminCommands = new AdminCommands();
     }
 
     @Override
@@ -42,47 +41,8 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        commandParser.parseCommand(jdaApi, content.toLowerCase(), event, srSession, srTracker);
-
-        if (channel.getName().equals("sr-tracking")) {
-            String[] input = content.split(" ");
-            if (input.length == 1 && isInteger(content)) {
-                Integer updatedSR = Integer.parseInt(content);
-                HashMap<String, Integer> srHistory = srTracker.updateSR(event.getAuthor().getId(), updatedSR);
-                String authorAsMention = event.getAuthor().getAsMention();
-                SRReporter srReporter = new SRReporter();
-                channel.sendMessage(srReporter.build(authorAsMention, "SR", "New", srHistory.get("New SR"),
-                        "Previous", srHistory.get("Old SR"), srHistory.get("Difference"))).queue();
-                if (srHistory.get("Difference") > 0) {
-                    event.getMessage().addReaction("\uD83D\uDC4D").queue();
-                    event.getMessage().addReaction("\uD83D\uDC4C").queue();
-                } else if (srHistory.get("Difference") < 0) {
-                    event.getMessage().addReaction("\uD83D\uDC4E").queue();
-                    event.getMessage().addReaction("\uD83D\uDE22").queue();
-                } else {
-                    event.getMessage().addReaction("\uD83D\uDE10").queue();
-                    event.getMessage().addReaction("\uD83E\uDD37").queue();
-                }
-                fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
-            }
-        }
-        if (event.getAuthor().getId().equals("230347831335059457")) {
-            //Save the SR history to file
-            if (content.contains("!say")) {
-                String[] commandString = content.split("!say");
-                String whatToSay = commandString[1];
-                event.getGuild().getTextChannelById("237059614384848896").sendMessage(whatToSay).queue();
-                System.out.printf("You told me to say: %s", whatToSay);
-            }
-            if (content.contains("!saveSR")) {
-                fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
-                channel.sendMessage("SR Tracker has been saved to the server.").queue();
-            }
-            if (content.contains("!loadSR")) {
-                srTracker.loadSRHistory(fileManager.parseStorageFile(fileManager.readFromTextFile("SRHistory.txt")));
-                channel.sendMessage("SR Tracker has been loaded from the server.").queue();
-            }
-        }
+        adminCommands.parseCommand(content, event);
+        commandParser.parseCommand(jdaApi, content, event, srSession, srTracker);
         if (content.contains("!tweet")) {
             String[] tweetContents = content.split("!tweet");
             String tweetLink = this.twitterManager.createTweet(tweetContents[1]);
@@ -134,16 +94,6 @@ public class MyListener extends ListenerAdapter {
                     }
                 }
             }
-        }
-    }
-
-    private boolean isInteger(String input) {
-        try {
-            Integer.parseInt(input);
-            return true;
-        }
-        catch(NumberFormatException e) {
-            return false;
         }
     }
 

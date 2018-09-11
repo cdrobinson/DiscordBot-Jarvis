@@ -1,4 +1,7 @@
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -12,7 +15,31 @@ class SRTracker {
         loadSRHistory(fileManager.parseStorageFile(fileManager.readFromTextFile("SRHistory.txt")));
     }
 
-    HashMap<String, Integer> updateSR(String userID, Integer updatedSR) {
+    void parseSrUpdate(String content, SRTracker srTracker, MessageReceivedEvent event, FileManager fileManager){
+        MessageChannel channel = event.getChannel();
+        String[] input = content.split(" ");
+        if (input.length == 1 && isInteger(content)) {
+            Integer updatedSR = Integer.parseInt(content);
+            HashMap<String, Integer> srHistory = srTracker.updateSR(event.getAuthor().getId(), updatedSR);
+            String authorAsMention = event.getAuthor().getAsMention();
+            SRReporter srReporter = new SRReporter();
+            channel.sendMessage(srReporter.build(authorAsMention, "SR", "New", srHistory.get("New SR"),
+                    "Previous", srHistory.get("Old SR"), srHistory.get("Difference"))).queue();
+            if (srHistory.get("Difference") > 0) {
+                event.getMessage().addReaction("\uD83D\uDC4D").queue();
+                event.getMessage().addReaction("\uD83D\uDC4C").queue();
+            } else if (srHistory.get("Difference") < 0) {
+                event.getMessage().addReaction("\uD83D\uDC4E").queue();
+                event.getMessage().addReaction("\uD83D\uDE22").queue();
+            } else {
+                event.getMessage().addReaction("\uD83D\uDE10").queue();
+                event.getMessage().addReaction("\uD83E\uDD37").queue();
+            }
+            fileManager.writeToTextFile(srTracker.getHistory().toString(), "SRHistory.txt");
+        }
+    }
+
+    private HashMap<String, Integer> updateSR(String userID, Integer updatedSR) {
         HashMap<String, Integer> srHistory = new HashMap<>();
         Integer oldSR = this.srMap.get(userID);
         if (oldSR == null) {
@@ -30,7 +57,7 @@ class SRTracker {
         }
     }
 
-    HashMap<String, Integer> getHistory() {
+    private HashMap<String, Integer> getHistory() {
         return this.srMap;
     }
 
@@ -50,11 +77,21 @@ class SRTracker {
         return leaderBoard;
     }
 
-    void loadSRHistory(HashMap<String, Integer> srHistory) {
+    private void loadSRHistory(HashMap<String, Integer> srHistory) {
         this.srMap = srHistory;
     }
 
     Integer getPlayerSR(String userID) {
         return this.srMap.get(userID);
+    }
+
+    private boolean isInteger(String input) {
+        try {
+            Integer.parseInt(input);
+            return true;
+        }
+        catch(NumberFormatException e) {
+            return false;
+        }
     }
 }

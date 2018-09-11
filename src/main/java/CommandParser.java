@@ -8,12 +8,17 @@ import java.util.List;
 class CommandParser {
 
     void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
+        String lcContent = content.toLowerCase();
         FileManager fileManager = new FileManager();
         String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
         MessageChannel channel = event.getChannel();
         SRReporter srReporter = new SRReporter();
+
+        if (channel.getName().equals("sr-tracking")) {
+            srTracker.parseSrUpdate(content, srTracker, event, fileManager);
+        }
 
         switch (command) {
             case "!ping":
@@ -161,8 +166,9 @@ class CommandParser {
                 }
                 break;
         }
+
         //Multi word commands
-        switch (content) {
+        switch (lcContent) {
             case "!no u":
             case "!no you":
                 File noYou = fileManager.getFile("noYou.png");
@@ -181,13 +187,13 @@ class CommandParser {
         }
 
         //Inline commands
-        if (content.contains("girl") || content.contains("grill") || content.contains("gorl") || content.contains("gurl")) {
+        if (lcContent.contains("girl") || lcContent.contains("grill") || lcContent.contains("gorl") || lcContent.contains("gurl")) {
             channel.sendMessage("If she breathes, she's a thot!").queue();
         }
-        if (content.contains("women")) {
+        if (lcContent.contains("women")) {
             channel.sendMessage("All women are queens").queue();
         }
-        if (content.contains("opinion")) {
+        if (lcContent.contains("opinion")) {
             File myOpinion = fileManager.getFile("myOpinion.png");
             if (myOpinion != null) {
                 channel.sendFile(myOpinion, "myOpinion.png").queue();
