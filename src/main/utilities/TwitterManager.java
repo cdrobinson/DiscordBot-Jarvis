@@ -1,11 +1,10 @@
-import ch.qos.logback.core.status.StatusListener;
 import twitter4j.*;
 import twitter4j.conf.ConfigurationBuilder;
 
 
 class TwitterManager {
     private Twitter twitter;
-    private StatusListener statusListener;
+    //private StatusListener statusListener;
 
     TwitterManager() {
         ConfigurationBuilder cb = new ConfigurationBuilder();

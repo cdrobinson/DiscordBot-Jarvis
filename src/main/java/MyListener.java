@@ -41,7 +41,7 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        adminCommands.parseCommand(content, event);
+        adminCommands.parseCommand(jdaApi, content, event);
         commandParser.parseCommand(jdaApi, content, event, srSession, srTracker);
         if (content.contains("!tweet")) {
             String[] tweetContents = content.split("!tweet");
