@@ -7,6 +7,12 @@ import java.util.List;
 
 class CommandParser {
 
+    private FeatureRequester featureRequester;
+
+    CommandParser(JDA jdaApi) {
+        this.featureRequester = new FeatureRequester(jdaApi.getGuildById("237059614384848896").getTextChannelsByName("feature-request", true).get(0));
+    }
+
     void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         String lcContent = content.toLowerCase();
         FileManager fileManager = new FileManager();
@@ -18,6 +24,11 @@ class CommandParser {
 
         if (channel.getName().equals("sr-tracking")) {
             srTracker.parseSrUpdate(content, srTracker, event, fileManager);
+        }
+        if (channel.getName().equals("feature-request")) {
+            if (command.equals("!rf")) {
+                featureRequester.addRequest(content.split("!rf ").toString());
+            }
         }
 
         switch (command) {

@@ -19,7 +19,7 @@ public class MyListener extends ListenerAdapter {
     private AdminCommands adminCommands;
 
     MyListener(JDA api) {
-        this.commandParser = new CommandParser();
+        this.commandParser = new CommandParser(jdaApi);
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
         this.twitterManager = new TwitterManager();
