@@ -1,4 +1,5 @@
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -19,12 +20,12 @@ public class MyListener extends ListenerAdapter {
     private AdminCommands adminCommands;
 
     MyListener(JDA api) {
-        this.commandParser = new CommandParser(jdaApi);
+        this.jdaApi = api;
+        this.adminCommands = new AdminCommands();
+        this.commandParser = new CommandParser();
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
         this.twitterManager = new TwitterManager();
-        this.jdaApi = api;
-        this.adminCommands = new AdminCommands();
     }
 
     @Override
@@ -41,7 +42,9 @@ public class MyListener extends ListenerAdapter {
         // We don't want to respond to other bot accounts, including ourselves
         // getContentRaw() is an atomic getter
         // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
-        adminCommands.parseCommand(jdaApi, content, event);
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            adminCommands.parseCommand(jdaApi, content, event);
+        }
         commandParser.parseCommand(jdaApi, content, event, srSession, srTracker);
         if (content.contains("!tweet")) {
             String[] tweetContents = content.split("!tweet");

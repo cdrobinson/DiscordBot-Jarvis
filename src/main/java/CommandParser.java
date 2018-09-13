@@ -1,5 +1,6 @@
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.io.File;
@@ -9,8 +10,8 @@ class CommandParser {
 
     private FeatureRequester featureRequester;
 
-    CommandParser(JDA jdaApi) {
-        this.featureRequester = new FeatureRequester(jdaApi.getGuildById("237059614384848896").getTextChannelsByName("feature-request", true).get(0));
+    CommandParser() {
+        this.featureRequester = new FeatureRequester();
     }
 
     void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
@@ -27,7 +28,21 @@ class CommandParser {
         }
         if (channel.getName().equals("feature-request")) {
             if (command.equals("!rf")) {
-                featureRequester.addRequest(content.split("!rf ").toString());
+                featureRequester.addRequest(content.split("!rf ")[1], event);
+            }
+            if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (command.equals("!rfsetup")) {
+                    featureRequester.setUp(event);
+                    //event.getMessage().delete().queue();
+                }
+                if (command.equals("!rfdeny")) {
+                    featureRequester.denyRequest(event, Integer.valueOf(lcContent.split("!rfdeny ")[1]));
+                    //event.getMessage().delete().queue();
+                }
+                if (command.equals("!rfapprove")) {
+                    featureRequester.approveRequest(event, Integer.valueOf(lcContent.split("!rfapprove ")[1]));
+                    //event.getMessage().delete().queue();
+                }
             }
         }
 
