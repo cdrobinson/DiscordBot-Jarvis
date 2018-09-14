@@ -33,15 +33,13 @@ class CommandParser {
             if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                 if (command.equals("!rfsetup")) {
                     featureRequester.setUp(event);
-                    //event.getMessage().delete().queue();
+                    event.getMessage().delete().queue();
                 }
                 if (command.equals("!rfdeny")) {
-                    featureRequester.denyRequest(event, Integer.valueOf(lcContent.split("!rfdeny ")[1]));
-                    //event.getMessage().delete().queue();
+                    featureRequester.denyRequest(event, lcContent.split("!rfdeny ")[1]);
                 }
                 if (command.equals("!rfapprove")) {
-                    featureRequester.approveRequest(event, Integer.valueOf(lcContent.split("!rfapprove ")[1]));
-                    //event.getMessage().delete().queue();
+                    featureRequester.approveRequest(event, lcContent.split("!rfapprove ")[1]);
                 }
             }
         }

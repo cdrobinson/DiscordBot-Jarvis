@@ -1,5 +1,4 @@
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.core.requests.restaction.MessageAction;
 
 
 class FeatureRequester {
@@ -7,7 +6,6 @@ class FeatureRequester {
     private String frChannelId;
     private String pinnedMessageId;
     private String featureList;
-
 
     FeatureRequester() {
         this.frChannelId = null;
@@ -27,10 +25,9 @@ class FeatureRequester {
         }
     }
 
-
-    private void saveFile(String guildName) {
+    private void saveFile() {
         FileManager fileManager = new FileManager();
-        String fileName = guildName + "_featureList.txt";
+        String fileName = "FrontLine_featureList.txt";
         String fileContents = this.frChannelId + "\n" +
                 this.pinnedMessageId + "\n" +
                 this.featureList;
@@ -51,12 +48,19 @@ class FeatureRequester {
                 stringBuilder.append("```");
                 pinnedMessage.editMessage(stringBuilder.toString()).queue();
                 this.featureList = stringBuilder.toString();
-                saveFile(event.getGuild().getName());
+                saveFile();
             });
         }
     }
 
-    void denyRequest(MessageReceivedEvent event, Integer requestNumber) {
+    void denyRequest(MessageReceivedEvent event, String requestString) {
+        Integer requestNumber;
+        try {
+            requestNumber = Integer.valueOf(requestString);
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
+            return;
+        }
         StringBuilder updatedMessage = new StringBuilder();
         updatedMessage.append("List of requested features:\n⭕=Received | ✔=Added | ❌=Denied\n");
         event.getChannel().getMessageById(pinnedMessageId).queue((pinnedMessage) -> {
@@ -74,12 +78,19 @@ class FeatureRequester {
                 updatedMessage.append("```");
                 pinnedMessage.editMessage(updatedMessage.toString()).queue();
                 this.featureList = updatedMessage.toString();
-                saveFile(event.getGuild().getName());
+                saveFile();
             }
         });
     }
 
-    void approveRequest(MessageReceivedEvent event, Integer requestNumber) {
+    void approveRequest(MessageReceivedEvent event, String requestString) {
+        Integer requestNumber;
+        try {
+            requestNumber = Integer.valueOf(requestString);
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
+            return;
+        }
         StringBuilder updatedMessage = new StringBuilder();
         updatedMessage.append("List of requested features:\n⭕=Received | ✔=Added | ❌=Denied\n");
         event.getChannel().getMessageById(pinnedMessageId).queue((pinnedMessage) -> {
@@ -97,7 +108,7 @@ class FeatureRequester {
                 updatedMessage.append("```");
                 pinnedMessage.editMessage(updatedMessage.toString()).queue();
                 this.featureList = updatedMessage.toString();
-                saveFile(event.getGuild().getName());
+                saveFile();
             }
         });
     }
@@ -105,15 +116,11 @@ class FeatureRequester {
     public void setUp(MessageReceivedEvent event) {
         String setupMessage = "List of requested features:\n⭕=Received | ✔=Added | ❌=Denied\n```\n```";
         event.getChannel().sendMessage(setupMessage).queue((featureListMessage) -> {
-            setPinnedMessageId(featureListMessage.getId());
+            this.pinnedMessageId = featureListMessage.getId();
             featureListMessage.pin().queue();
+            this.frChannelId = event.getChannel().getId();
+            this.featureList = setupMessage;
+            saveFile();
         });
-        this.frChannelId = event.getChannel().getId();
-        this.featureList = setupMessage;
-        saveFile(event.getGuild().getName());
-    }
-
-    void setPinnedMessageId(String id) {
-        this.pinnedMessageId = id;
     }
 }
