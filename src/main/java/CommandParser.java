@@ -1,5 +1,6 @@
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.io.File;
@@ -7,14 +8,41 @@ import java.util.List;
 
 class CommandParser {
 
-    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
-        FileManager fileManager = new FileManager();
+    private FeatureRequester featureRequester;
 
+    CommandParser() {
+        this.featureRequester = new FeatureRequester();
+    }
+
+    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
+        String lcContent = content.toLowerCase();
+        FileManager fileManager = new FileManager();
         String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
         MessageChannel channel = event.getChannel();
         SRReporter srReporter = new SRReporter();
+
+        if (channel.getName().equals("sr-tracking")) {
+            srTracker.parseSrUpdate(content, srTracker, event, fileManager);
+        }
+        if (channel.getName().equals("feature-request")) {
+            if (command.equals("!rf")) {
+                featureRequester.addRequest(content.split("!rf ")[1], event);
+            }
+            if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                if (command.equals("!rfsetup")) {
+                    featureRequester.setUp(event);
+                    event.getMessage().delete().queue();
+                }
+                if (command.equals("!rfdeny")) {
+                    featureRequester.denyRequest(event, lcContent.split("!rfdeny ")[1]);
+                }
+                if (command.equals("!rfapprove")) {
+                    featureRequester.approveRequest(event, lcContent.split("!rfapprove ")[1]);
+                }
+            }
+        }
 
         switch (command) {
             case "!ping":
@@ -73,23 +101,8 @@ class CommandParser {
                     message.addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
                 }
                 break;
-            case "opinion":
-                File myOpinion = fileManager.getFile("myOpinion.png");
-                if (myOpinion != null) {
-                    channel.sendFile(myOpinion, "myOpinion.png").queue();
-                }
-                break;
-            case "girl":
-            case "gorl":
-            case "grill":
-            case "gurl":
-                channel.sendMessage("If she breathes, she's a thot!").queue();
-                break;
             case "gruhz":
                 channel.sendMessage("Fuck off, Oly").queue();
-                break;
-            case "women":
-                channel.sendMessage("All women are queens").queue();
                 break;
             case "!sr":
                 String lookUpID;
@@ -122,6 +135,9 @@ class CommandParser {
                         }
                     }
                 }
+                break;
+            case "!vote":
+                UserInputManager.createPoll(event);
                 break;
             case "!session":
                 Integer currentSR = srTracker.getPlayerSR(authorID);
@@ -174,8 +190,9 @@ class CommandParser {
                 }
                 break;
         }
+
         //Multi word commands
-        switch (content.toLowerCase()) {
+        switch (lcContent) {
             case "!no u":
             case "!no you":
                 File noYou = fileManager.getFile("noYou.png");
@@ -183,14 +200,28 @@ class CommandParser {
                     channel.sendFile(noYou, "noYou.png").queue();
                 }
                 break;
-            default:
-                break;
             case "no u":
             case "no you":
                 for (Message message: event.getChannel().getHistoryBefore(event.getMessageId(), 1).complete().getRetrievedHistory()) {
                     message.addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
                 }
                 break;
+            default:
+                break;
+        }
+
+        //Inline commands
+        if (lcContent.contains("girl") || lcContent.contains("grill") || lcContent.contains("gorl") || lcContent.contains("gurl")) {
+            channel.sendMessage("If she breathes, she's a thot!").queue();
+        }
+        if (lcContent.contains("women")) {
+            channel.sendMessage("All women are queens").queue();
+        }
+        if (lcContent.contains("opinion")) {
+            File myOpinion = fileManager.getFile("myOpinion.png");
+            if (myOpinion != null) {
+                channel.sendFile(myOpinion, "myOpinion.png").queue();
+            }
         }
     }
 }

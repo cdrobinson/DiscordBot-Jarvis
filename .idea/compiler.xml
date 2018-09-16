@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="InteliJ Files" />
+        <module name="Jarvis Files" />
         <module name="JarvisBot" />
       </profile>
     </annotationProcessing>
