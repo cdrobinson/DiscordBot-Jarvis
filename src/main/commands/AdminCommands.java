@@ -38,6 +38,8 @@ class AdminCommands {
                 jdaApi.getPresence().setGame(Game.playing(content.split("!playing")[1]));
                 channel.sendMessageFormat("I will start playing %s now.", content.split("!playing")[1]).queue();
                 break;
+            default:
+                break;
         }
     }
 }
