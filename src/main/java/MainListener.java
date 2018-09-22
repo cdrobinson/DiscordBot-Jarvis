@@ -26,7 +26,7 @@ public class MainListener extends ListenerAdapter {
         this.commandParser = new CommandParser();
         this.srTracker = new SRTracker();
         this.srSession = new SRSession();
-        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelById(cm.getProperty("outputChannelID"))));
+        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelById(cm.getProperty("twitterOutputChannelID"))));
         thread.start();
     }
 
@@ -74,6 +74,7 @@ public class MainListener extends ListenerAdapter {
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
+        if (event.getUser().isBot()) return;
         //event.getAuthor().openPrivateChannel(.queue((userPM) -> userPM.sendMessage("Message").queue());
         String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + HelpMessageBuilder.getHelpMessage();
         event.getMember().getUser().openPrivateChannel().queue((userPM) -> userPM.sendMessage(welcomeMessage).queue());

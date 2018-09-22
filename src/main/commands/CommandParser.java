@@ -26,7 +26,7 @@ class CommandParser {
         if (channel.getName().equals("sr-tracking")) {
             srTracker.parseSrUpdate(content, srTracker, event, fileManager);
         }
-        if (channel.getName().equals("feature-request")) {
+        if (channel.getId().equals(new ConfigManager().getProperty("twitterOutputChannelID"))) {
             if (command.equals("!rf")) {
                 featureRequester.addRequest(event.getMessage().getContentDisplay().split("!rf ")[1], event);
             }
