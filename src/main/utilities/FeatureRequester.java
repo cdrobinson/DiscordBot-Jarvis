@@ -1,8 +1,4 @@
-import net.dv8tion.jda.core.entities.IMentionable;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-
 
 class FeatureRequester {
 
@@ -53,7 +49,6 @@ class FeatureRequester {
             newMessage.pin().queue();
             saveFile();
         });
-
     }
 
     void addRequest(String request, MessageReceivedEvent event) {
