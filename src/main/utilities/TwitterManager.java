@@ -10,6 +10,7 @@ import com.twitter.hbc.core.processor.StringDelimitedProcessor;
 import com.twitter.hbc.httpclient.auth.Authentication;
 import com.twitter.hbc.httpclient.auth.OAuth1;
 import net.dv8tion.jda.core.entities.TextChannel;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Arrays;
@@ -45,7 +46,6 @@ class TwitterManager implements Runnable{
 
         // These secrets should be read from a config file
         Authentication twitterAuth = new OAuth1(cm.getProperty("consumerKey"), cm.getProperty("consumerSecret"), cm.getProperty("token"), cm.getProperty("tokenSecret"));
-
         ClientBuilder builder = new ClientBuilder()
                 .name(cm.getProperty("watcherName"))                           // optional: mainly for the logs
                 .hosts(twitterHosts)
@@ -61,14 +61,36 @@ class TwitterManager implements Runnable{
     @Override
     public void run() {
         // on a different thread, or multiple different threads....
-
         while (!twitterClient.isDone()) {
             try {
                 String msg = msgQueue.take();
-                this.outputChannel.sendMessage(getTweetLink(msg)).queue();
+                if (!isRetweet(msg) && !isReply(msg)) {
+                    this.outputChannel.sendMessage(getTweetLink(msg)).queue();
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private boolean isRetweet(String jsonString) {
+        JSONObject tweet = new JSONObject(jsonString);
+        try {
+            tweet.getJSONObject("retweeted_status");
+            return true;
+        } catch (JSONException e) {
+            return !e.getMessage().equals("JSONObject[\"retweeted_status\"] not found.");
+        }
+    }
+
+    private boolean isReply(String jsonString) {
+        JSONObject tweet = new JSONObject(jsonString);
+        try {
+            tweet.getLong("in_reply_to_status_id");
+            return true;
+        } catch (JSONException e) {
+            System.out.println(e.getMessage());
+            return !e.getMessage().equals("JSONObject[\"in_reply_to_status_id\"] is not a long.");
         }
     }
 
