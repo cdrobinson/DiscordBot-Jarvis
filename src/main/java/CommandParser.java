@@ -28,7 +28,10 @@ class CommandParser {
         }
         if (channel.getName().equals("feature-request")) {
             if (command.equals("!rf")) {
-                featureRequester.addRequest(content.split("!rf ")[1], event);
+                featureRequester.addRequest(event.getMessage().getContentDisplay().split("!rf ")[1], event);
+            }
+            if (command.equals("!rfrepost")) {
+                featureRequester.repostFeatureList(event);
             }
             if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
                 if (command.equals("!rfsetup")) {

@@ -62,14 +62,14 @@ class TwitterManager implements Runnable{
         while (!twitterClient.isDone()) {
             try {
                 String msg = msgQueue.take();
-                this.outputChannel.sendMessage(parseTweet(msg)).queue();
+                this.outputChannel.sendMessage(getTweetLink(msg)).queue();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    private String parseTweet(String jsonString) {
+    private String getTweetLink(String jsonString) {
         JSONObject tweet = new JSONObject(jsonString);
         JSONObject user = tweet.getJSONObject("user");
         return "\nhttps://twitter.com/" + user.get("screen_name") + "/status/" + tweet.get("id");

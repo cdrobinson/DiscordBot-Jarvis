@@ -1,3 +1,6 @@
+import net.dv8tion.jda.core.entities.IMentionable;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 
@@ -21,7 +24,13 @@ class FeatureRequester {
             String[] featureList = fileContents.split("\n");
             this.frChannelId = featureList[0];
             this.pinnedMessageId = featureList[1];
-            this.featureList = featureList[2];
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(featureList[2]);
+            for (int i = 3; i < featureList.length; i++) {
+                stringBuilder.append("\n");
+                stringBuilder.append(featureList[i]);
+            }
+            this.featureList = stringBuilder.toString();
         }
     }
 
@@ -32,6 +41,19 @@ class FeatureRequester {
                 this.pinnedMessageId + "\n" +
                 this.featureList;
         fileManager.writeToTextFile(fileContents, fileName);
+    }
+
+    void repostFeatureList(MessageReceivedEvent event) {
+        event.getGuild().getTextChannelById(frChannelId).getMessageById(pinnedMessageId).queue((pinnedMessage) -> {
+            pinnedMessage.unpin().queue();
+            pinnedMessage.delete().queue();
+        });
+        event.getGuild().getTextChannelById(this.frChannelId).sendMessage(this.featureList).queue((newMessage) -> {
+            this.pinnedMessageId = newMessage.getId();
+            newMessage.pin().queue();
+            saveFile();
+        });
+
     }
 
     void addRequest(String request, MessageReceivedEvent event) {
