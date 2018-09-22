@@ -15,6 +15,7 @@ class HelpMessageBuilder {
                 "!sr [@someone]: Tells you that person's SR and the difference from your current SR \n" +
                 "================#feature-request only================\n" +
                 "!rf [request]: Adds your request to the list\n" +
+                "!rfRepost: Reposts the feature request list in the chat\n" +
                 "================#music only================\n" +
                 ".play: Plays songs from the current queue. Starts playing again if it was previously paused\n" +
                 ".play [url]: Adds a new song to the queue and starts playing if it wasn't playing already\n" +

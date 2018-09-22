@@ -7,10 +7,11 @@ import javax.security.auth.login.LoginException;
 public class Bot {
 
     public static void main(String[] args) throws LoginException, InterruptedException {
-        JDA api = new JDABuilder(AccountType.BOT).setToken("NDY5NzI1MzgyODU4MjQ0MDk5.DjL9jQ.NrmqdL4jUiyIknGAtdlpGU_w9_M").build().awaitReady();
-        api.addEventListener(new MyListener(api));
+        ConfigManager configManager = new ConfigManager();
+        JDA api = new JDABuilder(AccountType.BOT).setToken(configManager.getProperty("botToken")).build().awaitReady();
+        api.addEventListener(new MainListener(api));
         api.addEventListener(new MusicPlayerControl());
         api.setAutoReconnect(true);
-        api.getPresence().setGame(Game.playing("Minecraft VR"));
+        api.getPresence().setGame(Game.playing(configManager.getProperty("defaultPlaying")));
     }
 }

@@ -12,6 +12,7 @@ import com.twitter.hbc.httpclient.auth.OAuth1;
 import net.dv8tion.jda.core.entities.TextChannel;
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -23,28 +24,30 @@ class TwitterManager implements Runnable{
     private TextChannel outputChannel;
 
     TwitterManager(TextChannel outputChannel) {
+        ConfigManager cm = new ConfigManager();
         this.outputChannel = outputChannel;
         /* Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
-        this.msgQueue = new LinkedBlockingQueue<>(10000);
-        BlockingQueue<Event> eventQueue = new LinkedBlockingQueue<>(1000);
+        this.msgQueue = new LinkedBlockingQueue<>(1000);
+        BlockingQueue<Event> eventQueue = new LinkedBlockingQueue<>(100);
 
         /* Declare the host you want to connect to, the endpoint, and authentication (basic auth or oauth) */
         Hosts twitterHosts = new HttpHosts(Constants.STREAM_HOST);
         StatusesFilterEndpoint twitterEndpoint = new StatusesFilterEndpoint();
         // Optional: set up some followings and track terms
-        List<Long> followings = Lists.newArrayList(1036790880232005632L);
-        List<String> terms = Lists.newArrayList("@cdrobinson");
+        List<Long> followings = Lists.newArrayList();
+        for (String following : cm.getProperty("followings").split(", ")) {
+            followings.add(Long.valueOf(following));
+        }
+        List<String> terms = Lists.newArrayList();
+        terms.addAll(Arrays.asList(cm.getProperty("terms").split(", ")));
         twitterEndpoint.followings(followings);
         twitterEndpoint.trackTerms(terms);
 
         // These secrets should be read from a config file
-        Authentication twitterAuth = new OAuth1("Opon8ooKZHMeo8Y7kx8BbF5b3",
-                "y6JQN4dLmOlxTGKk4VBNKC9yjjt1bTnUI4E8agk0cKkThQspEe",
-                "77091379-J3amRA0kW3cAdM6KCqzejH5IL1FdnJp6eOyy2qGOg",
-                "yQW44oFlX3b3U4AHA0IZJsVfoPOBjs3pQCF5kkSiAenqu");
+        Authentication twitterAuth = new OAuth1(cm.getProperty("consumerKey"), cm.getProperty("consumerSecret"), cm.getProperty("token"), cm.getProperty("tokenSecret"));
 
         ClientBuilder builder = new ClientBuilder()
-                .name("Jarvis Watcher")                           // optional: mainly for the logs
+                .name(cm.getProperty("watcherName"))                           // optional: mainly for the logs
                 .hosts(twitterHosts)
                 .authentication(twitterAuth)
                 .endpoint(twitterEndpoint)
