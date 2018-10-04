@@ -26,27 +26,30 @@ class CommandParser {
         if (channel.getName().equals("sr-tracking")) {
             srTracker.parseSrUpdate(content, srTracker, event, fileManager);
         }
-        if (channel.getId().equals(new ConfigManager().getProperty("twitterOutputChannelID"))) {
-            if (command.equals("!rf")) {
-                featureRequester.addRequest(event.getMessage().getContentDisplay().split("!rf ")[1], event);
-            }
-            if (command.equals("!rfrepost")) {
-                featureRequester.repostFeatureList(event);
+        if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
+            switch (command) {
+                case "!rf":
+                    featureRequester.addRequest(event.getMessage().getContentDisplay().split("!rf ")[1], event);
+                    break;
+                case "!rfrepost":
+                    featureRequester.repostFeatureList(event);
+                    break;
             }
             if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                if (command.equals("!rfsetup")) {
-                    featureRequester.setUp(event);
-                    event.getMessage().delete().queue();
-                }
-                if (command.equals("!rfdeny")) {
-                    featureRequester.denyRequest(event, lcContent.split("!rfdeny ")[1]);
-                }
-                if (command.equals("!rfapprove")) {
-                    featureRequester.approveRequest(event, lcContent.split("!rfapprove ")[1]);
+                switch (command) {
+                    case "!rfsetup":
+                        featureRequester.setUp(event);
+                        event.getMessage().delete().queue();
+                        break;
+                    case "!rfdeny":
+                        featureRequester.denyRequest(event, lcContent.split("!rfdeny ")[1]);
+                        break;
+                    case "!rfapprove":
+                        featureRequester.approveRequest(event, lcContent.split("!rfapprove ")[1]);
+                        break;
                 }
             }
         }
-
         switch (command) {
             case "!ping":
                 channel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();
@@ -107,24 +110,43 @@ class CommandParser {
             case "gruhz":
                 channel.sendMessage("Fuck off, Oly").queue();
                 break;
+            case "!testing":
+                channel.sendMessage("Let me check that for you...").queue();
+                if (contentString.length > 1) {
+                    String srCheck = ProfileReader.getSR(contentString[1]);
+                    channel.sendMessage(srCheck).queue();
+                }
+                break;
             case "!sr":
-                String lookUpID;
-                String tester = contentString[1].substring(2, 3);
-                if (tester.equals("!")) {
-                    lookUpID = contentString[1].substring(3, contentString[1].length()-1);
-                } else {
-                    lookUpID = contentString[1].substring(2, contentString[1].length()-1);
-                }
-                Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
-                String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
-                if (lookUpSR != null) {
+                try {
+                    if (contentString[1] != null) {
+                        String lookUpID;
+                        //checks if the member @'ed is using a nickname or not
+                        String nicknameTag = contentString[1].substring(2, 3);
+                        if (nicknameTag.equals("!")) {
+                            lookUpID = contentString[1].substring(3, contentString[1].length() - 1);
+                        } else {
+                            lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
+                        }
+                        Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
+                        String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
+                        if (lookUpSR != null) {
+                            Integer authorSR = srTracker.getPlayerSR(authorID);
+                            Integer difference = authorSR - lookUpSR;
+                            channel.sendMessage(srReporter.build(lookUpName, "SR Report", lookUpName + "'s", lookUpSR,
+                                    "Your", authorSR, difference)).queue();
+                        } else {
+                            channel.sendMessage(lookUpName + " thinks they are too good for me to track their SR").queue();
+                        }
+                    }
+                } catch (ArrayIndexOutOfBoundsException e) {
                     Integer authorSR = srTracker.getPlayerSR(authorID);
-                    Integer difference = authorSR - lookUpSR;
-                    channel.sendMessage(srReporter.build(lookUpName, "SR Report", lookUpName + "'s", lookUpSR,
-                            "Your", authorSR, difference)).queue();
-                } else {
-                    channel.sendMessage(lookUpName + " thinks they are too good for me to track their SR").queue();
-                }
+                    if (authorSR != null) {
+                        channel.sendMessage("I'm not sure why you're looking up your own SR but here it is: " + authorSR).queue();
+                    } else {
+                        channel.sendMessage("Why would you look up your own SR and not even have it recorded?").queue();
+                    }
+                    }
                 break;
             case "!chirpchirp":
                 List<Guild> mutualGuilds = event.getMember().getUser().getMutualGuilds();
