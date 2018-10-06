@@ -17,15 +17,14 @@ class CommandParser {
     void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         String lcContent = content.toLowerCase();
         FileManager fileManager = new FileManager();
-        String authorID = event.getAuthor().getId();
         String[] contentString = content.split(" ");
         String command = contentString[0].toLowerCase();
         MessageChannel channel = event.getChannel();
-        SRReporter srReporter = new SRReporter();
 
-        if (channel.getName().equals("sr-tracking")) {
-            srTracker.parseSrUpdate(content, srTracker, event, fileManager);
+        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
+            srTracker.parseCommand(contentString, event, srSession);
         }
+
         if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
             switch (command) {
                 case "!rf":
@@ -50,6 +49,7 @@ class CommandParser {
                 }
             }
         }
+
         switch (command) {
             case "!ping":
                 channel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();
@@ -93,9 +93,6 @@ class CommandParser {
                     channel.sendMessage(noiceBuilder.build()).queue();
                 }
                 break;
-            case "!leaderboard":
-                channel.sendMessage(srTracker.getLeaderboard(event.getGuild())).queue();
-                break;
             case "!wow":
                 File wowPic = fileManager.getFile("wow.jpg");
                 if (wowPic != null) {
@@ -117,37 +114,6 @@ class CommandParser {
                     channel.sendMessage(srCheck).queue();
                 }
                 break;
-            case "!sr":
-                try {
-                    if (contentString[1] != null) {
-                        String lookUpID;
-                        //checks if the member @'ed is using a nickname or not
-                        String nicknameTag = contentString[1].substring(2, 3);
-                        if (nicknameTag.equals("!")) {
-                            lookUpID = contentString[1].substring(3, contentString[1].length() - 1);
-                        } else {
-                            lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
-                        }
-                        Integer lookUpSR = srTracker.getPlayerSR(lookUpID);
-                        String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
-                        if (lookUpSR != null) {
-                            Integer authorSR = srTracker.getPlayerSR(authorID);
-                            Integer difference = authorSR - lookUpSR;
-                            channel.sendMessage(srReporter.build(lookUpName, "SR Report", lookUpName + "'s", lookUpSR,
-                                    "Your", authorSR, difference)).queue();
-                        } else {
-                            channel.sendMessage(lookUpName + " thinks they are too good for me to track their SR").queue();
-                        }
-                    }
-                } catch (ArrayIndexOutOfBoundsException e) {
-                    Integer authorSR = srTracker.getPlayerSR(authorID);
-                    if (authorSR != null) {
-                        channel.sendMessage("I'm not sure why you're looking up your own SR but here it is: " + authorSR).queue();
-                    } else {
-                        channel.sendMessage("Why would you look up your own SR and not even have it recorded?").queue();
-                    }
-                    }
-                break;
             case "!chirpchirp":
                 List<Guild> mutualGuilds = event.getMember().getUser().getMutualGuilds();
                 for (Guild guild : mutualGuilds) {
@@ -163,56 +129,6 @@ class CommandParser {
                 break;
             case "!vote":
                 UserInputManager.createPoll(event);
-                break;
-            case "!session":
-                Integer currentSR = srTracker.getPlayerSR(authorID);
-                Integer storedSR = srSession.getStoredSR(authorID);
-                if (contentString.length == 1) {
-                    channel.sendMessage("The session command you entered was invalid. Your options are [start, current, end].").queue();
-                    break;
-                }
-                switch (contentString[1]) {
-                    case "start":
-                        if (currentSR != null) {
-                            Boolean started = srSession.startSession(authorID, currentSR);
-                            if (started) {
-                                channel.sendMessage("Starting a session for " + event.getAuthor().getAsMention() + " with a starting SR of " + currentSR).queue();
-                            } else {
-                                channel.sendMessageFormat("There is already a session for %s with a starting SR of %s", event.getAuthor().getAsMention(), storedSR).queue();
-                            }
-                        } else {
-                            channel.sendMessage("Please enter a starting SR first.").queue();
-                        }
-                        break;
-                    case "current":
-                        if (currentSR != null) {
-                            if (srSession.isSessionRunning(authorID)) {
-                                channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
-                                        "Current", currentSR, (currentSR - storedSR))).queue();
-                            } else {
-                                channel.sendMessage("You don't have a session going right now. Type \"!session start\" to begin one.").queue();
-                            }
-                        } else {
-                            channel.sendMessage("Please enter a starting SR first.").queue();
-                        }
-                        break;
-                    case "end":
-                        if (currentSR != null) {
-                            if (srSession.isSessionRunning(authorID)) {
-                                channel.sendMessage(srReporter.build(event.getAuthor().getAsMention(), "Session Details", "Starting", storedSR,
-                                        "Ending", currentSR, (currentSR - storedSR))).queue();
-                                srSession.endSession(authorID);
-                            } else {
-                                channel.sendMessage("You don't have a session going right now. Type \"!session start\" to begin one.").queue();
-                            }
-                        } else {
-                            channel.sendMessage("Please enter a starting SR first.").queue();
-                        }
-                        break;
-                    default:
-                        channel.sendMessage("The session command you entered was invalid. Your options are [start, current, end].").queue();
-                        break;
-                }
                 break;
         }
 

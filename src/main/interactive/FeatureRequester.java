@@ -15,7 +15,7 @@ class FeatureRequester {
 
     private void loadFromFile() {
         FileManager fileManager = new FileManager();
-        String fileContents = fileManager.readFromTextFile(new ConfigManager().getProperty("serverName") + "_featureList.txt");
+        String fileContents = fileManager.readFromTextFile(new ConfigManager().getProperty("guildName") + "_featureList.txt");
         if (fileContents != null) {
             String[] featureList = fileContents.split("\n");
             this.frChannelId = featureList[0];
@@ -32,7 +32,7 @@ class FeatureRequester {
 
     private void saveFile() {
         FileManager fileManager = new FileManager();
-        String fileName = new ConfigManager().getProperty("serverName") + "_featureList.txt";
+        String fileName = new ConfigManager().getProperty("guildName") + "_featureList.txt";
         String fileContents = this.frChannelId + "\n" +
                 this.pinnedMessageId + "\n" +
                 this.featureList;

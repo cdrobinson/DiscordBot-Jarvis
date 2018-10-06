@@ -24,9 +24,9 @@ public class MainListener extends ListenerAdapter {
         this.jdaApi = api;
         this.adminCommands = new AdminCommands();
         this.commandParser = new CommandParser();
-        this.srTracker = new SRTracker();
+        this.srTracker = new SRTracker(jdaApi);
         this.srSession = new SRSession();
-        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelById(cm.getProperty("twitterOutputChannelID"))));
+        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
         thread.start();
     }
 

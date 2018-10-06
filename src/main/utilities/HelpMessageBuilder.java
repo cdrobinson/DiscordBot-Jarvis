@@ -8,7 +8,7 @@ class HelpMessageBuilder {
                 "================BSU Students Only================ \n" +
                 "!chirpchirp: Run this command after registering as a BSU student on the Cardinal Esports Discord server\n" +
                 "================#sr-tracking only================\n" +
-                "[####]: To set your SR, type only your SR into the #sr-tracking channel, ie. 2500\n" +
+                "!srTrack [Battletag]: Has Jarvis track your SR as you play. (SR is updated every 15 minutes and your profile has to be public) \n" +
                 "!session start: Begins an SR tracking session. Will record your SR when the command is ran \n" +
                 "!session current: Tells you the current difference between your SR at the beginning of the session and your current SR \n" +
                 "!session end: Tells you the final difference between your SR at the beginning of the session and your current SR \n" +

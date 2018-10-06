@@ -6,7 +6,6 @@ import java.io.IOException;
 class ProfileReader {
 
     static String getSR(String battleTag) {
-
         StringBuilder url = new StringBuilder();
         url.append("https://playoverwatch.com/en-us/career/pc/");
         url.append(battleTag.replaceAll("#", "-"));
@@ -28,7 +27,7 @@ class ProfileReader {
             Elements content = doc.getElementsByClass("competitive-rank");
             if (content.size() != 0) {
                 Elements rank = content.first().getElementsByClass("u-align-center h5");
-                return "This player's SR is: " + rank.first().text();
+                return rank.first().text();
             } else {
                 return "This player has not placed yet";
             }
