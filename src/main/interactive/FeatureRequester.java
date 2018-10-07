@@ -1,12 +1,16 @@
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+package interactive;
 
-class FeatureRequester {
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import utilities.ConfigManager;
+import utilities.FileManager;
+
+public class FeatureRequester {
 
     private String frChannelId;
     private String pinnedMessageId;
     private String featureList;
 
-    FeatureRequester() {
+    public FeatureRequester() {
         this.frChannelId = null;
         this.pinnedMessageId = null;
         this.featureList = null;
@@ -39,7 +43,7 @@ class FeatureRequester {
         fileManager.writeToTextFile(fileContents, fileName);
     }
 
-    void repostFeatureList(MessageReceivedEvent event) {
+    public void repostFeatureList(MessageReceivedEvent event) {
         event.getGuild().getTextChannelById(frChannelId).getMessageById(pinnedMessageId).queue((pinnedMessage) -> {
             pinnedMessage.unpin().queue();
             pinnedMessage.delete().queue();
@@ -51,7 +55,7 @@ class FeatureRequester {
         });
     }
 
-    void addRequest(String request, MessageReceivedEvent event) {
+    public void addRequest(String request, MessageReceivedEvent event) {
         StringBuilder stringBuilder = new StringBuilder();
         if (this.pinnedMessageId == null) {
             event.getChannel().sendMessage("A feature list hasn't been setup yet. Please run !rfSetup first").queue();
@@ -70,7 +74,7 @@ class FeatureRequester {
         }
     }
 
-    void denyRequest(MessageReceivedEvent event, String requestString) {
+    public void denyRequest(MessageReceivedEvent event, String requestString) {
         Integer requestNumber;
         try {
             requestNumber = Integer.valueOf(requestString);
@@ -100,7 +104,7 @@ class FeatureRequester {
         });
     }
 
-    void approveRequest(MessageReceivedEvent event, String requestString) {
+    public void approveRequest(MessageReceivedEvent event, String requestString) {
         Integer requestNumber;
         try {
             requestNumber = Integer.valueOf(requestString);

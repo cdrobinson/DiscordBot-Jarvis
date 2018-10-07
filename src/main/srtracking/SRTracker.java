@@ -1,20 +1,25 @@
+package srtracking;
+
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import utilities.ConfigManager;
+import utilities.FileManager;
 
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-class SRTracker {
+public class SRTracker {
     //HashMap contains <DiscordUserID, <["sr", UserSR], ["battletag", UserBattletag]>>
     private HashMap<String, HashMap<String, String>> srMap;
     private JDA jda;
     private TextChannel srTrackingChannel;
 
-    SRTracker(JDA jda) {
+    public SRTracker(JDA jda) {
         ConfigManager cm = new ConfigManager();
         this.jda = jda;
         this.srTrackingChannel = jda.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("srTrackingChannelName"), true).get(0);
@@ -73,13 +78,28 @@ class SRTracker {
         System.out.printf("%s has registered %s as their Battletag with an SR of %s", userID, battletag, userSR);
     }
 
-    /*
-    String getLeaderboard(Guild guild) {
-        Set<Entry<String, HashMap<String, String>>> set = this.srMap.entrySet();
-        List<Entry<String, Integer>> list = new ArrayList<>(set);
-        list.sort((o1, o2) -> (o2.getValue()).compareTo(o1.getValue()));
+    private static <K,V extends Comparable<? super V>> SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K, V> map) {
+        //https://stackoverflow.com/questions/2864840/treemap-sort-by-value
+        SortedSet<Map.Entry<K,V>> sortedEntries = new TreeSet<>((e1, e2) -> {
+            int res = e2.getValue().compareTo(e1.getValue());
+            return res != 0 ? res : 1;
+        });
+        sortedEntries.addAll(map.entrySet());
+        return sortedEntries;
+    }
+
+    private String getLeaderboard() {
+        Map<String, Integer> userSrMap = new HashMap<>();
+        for (Entry<String, HashMap<String, String>> set : this.srMap.entrySet()) {
+            String userID = set.getKey();
+            Integer userSR = Integer.valueOf(set.getValue().get("sr"));
+            userSrMap.put(userID, userSR);
+        }
+        SortedSet<Entry<String, Integer>> sortedMap = entriesSortedByValues(userSrMap);
+        ConfigManager cm = new ConfigManager();
+        Guild guild = jda.getGuildById(cm.getProperty("guildID"));
         String leaderBoard = "=====================\r";
-        for(Map.Entry<String, Integer> entry:list) {
+        for(Entry<String, Integer> entry : sortedMap) {
             try {
                 leaderBoard = leaderBoard.concat(guild.getMemberById(entry.getKey()).getEffectiveName() + " - " + entry.getValue() + "\r");
             } catch (NullPointerException e) {
@@ -88,7 +108,7 @@ class SRTracker {
         }
         leaderBoard = leaderBoard.concat("=====================");
         return leaderBoard;
-    }*/
+    }
 
     private void loadSRHistory() {
         FileManager fileManager = new FileManager();
@@ -128,7 +148,7 @@ class SRTracker {
         }
     }
 
-    void parseCommand(String[] contentString, MessageReceivedEvent event, SRSession srSession) {
+    public void parseCommand(String[] contentString, MessageReceivedEvent event, SRSession srSession) {
         String authorID = event.getAuthor().getId();
         SRReporter srReporter = new SRReporter();
         MessageChannel channel = event.getChannel();
@@ -162,7 +182,7 @@ class SRTracker {
                 }
                 break;
             case "!leaderboard":
-                channel.sendMessage("The leaderboard feature is currently under construction. Thank you for your patience.").queue();
+                channel.sendMessage(getLeaderboard()).queue();
                 break;
             case "!srtrack":
                 if (contentString.length == 1) {

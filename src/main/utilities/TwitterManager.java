@@ -1,3 +1,5 @@
+package utilities;
+
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
 import com.twitter.hbc.core.Client;
@@ -18,13 +20,13 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-class TwitterManager implements Runnable{
+public class TwitterManager implements Runnable{
 
     private Client twitterClient;
     private BlockingQueue<String> msgQueue;
     private TextChannel outputChannel;
 
-    TwitterManager(TextChannel outputChannel) {
+    public TwitterManager(TextChannel outputChannel) {
         ConfigManager cm = new ConfigManager();
         this.outputChannel = outputChannel;
         /* Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */

@@ -1,9 +1,11 @@
+package utilities;
+
 import java.io.*;
 import java.util.HashMap;
 
-class FileManager {
+public class FileManager {
 
-    void writeToTextFile(String textToWrite, String fileName) {
+    public void writeToTextFile(String textToWrite, String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
             FileWriter fileWriter = new FileWriter(fileLocation + "/textFiles/" + fileName);
@@ -18,7 +20,7 @@ class FileManager {
         }
     }
 
-    String readFromTextFile(String fileName) {
+    public String readFromTextFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
             FileReader fileReader = new FileReader(fileLocation + "/textFiles/" + fileName);
@@ -41,7 +43,7 @@ class FileManager {
         }
     }
 
-    HashMap<String, Integer> parseStorageFile(String fileContent) {
+    public HashMap<String, Integer> parseStorageFile(String fileContent) {
         if (fileContent != null) {
             HashMap<String, Integer> parsedContent = new HashMap<>();
             if(fileContent.length() > 2) {
@@ -59,7 +61,7 @@ class FileManager {
         }
     }
 
-    File getFile(String fileName) {
+    public File getFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
             File file = new File(fileLocation + "/images/" + fileName);

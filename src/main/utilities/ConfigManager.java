@@ -1,12 +1,14 @@
+package utilities;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-class ConfigManager {
+public class ConfigManager {
 
     private Properties prop;
 
-    ConfigManager() {
+    public ConfigManager() {
         this.prop = new Properties();
         InputStream input = null;
         String filename = "config.properties";
@@ -32,7 +34,7 @@ class ConfigManager {
         }
     }
 
-    String getProperty(String key) {
+    public String getProperty(String key) {
         return this.prop.getProperty(key);
     }
 }

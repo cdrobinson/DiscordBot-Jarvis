@@ -1,10 +1,14 @@
+package srtracking;
+
+import utilities.FileManager;
+
 import java.util.HashMap;
 
-class SRSession {
+public class SRSession {
     private HashMap<String, Integer> srSessionMap;
     private FileManager fileManager;
 
-    SRSession() {
+    public SRSession() {
         this.srSessionMap = new HashMap<>();
         this.fileManager = new FileManager();
         loadSessions(fileManager.parseStorageFile(fileManager.readFromTextFile("SRSessions.txt")));

@@ -1,20 +1,31 @@
+package commands;
+
+import interactive.FeatureRequester;
+import interactive.UserInputManager;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import srtracking.ProfileReader;
+import srtracking.SRSession;
+import srtracking.SRTracker;
+import utilities.ConfigManager;
+import utilities.FileManager;
+import utilities.HelpMessageBuilder;
+
 import java.io.File;
 import java.util.List;
 
-class CommandParser {
+public class CommandParser {
 
     private FeatureRequester featureRequester;
 
-    CommandParser() {
+    public CommandParser() {
         this.featureRequester = new FeatureRequester();
     }
 
-    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
+    public void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
         String lcContent = content.toLowerCase();
         FileManager fileManager = new FileManager();
         String[] contentString = content.split(" ");

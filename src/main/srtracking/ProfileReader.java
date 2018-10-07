@@ -1,11 +1,13 @@
+package srtracking;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import java.io.IOException;
 
-class ProfileReader {
+public class ProfileReader {
 
-    static String getSR(String battleTag) {
+    public static String getSR(String battleTag) {
         StringBuilder url = new StringBuilder();
         url.append("https://playoverwatch.com/en-us/career/pc/");
         url.append(battleTag.replaceAll("#", "-"));

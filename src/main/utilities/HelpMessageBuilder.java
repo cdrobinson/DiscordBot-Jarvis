@@ -1,5 +1,7 @@
-class HelpMessageBuilder {
-    static String getHelpMessage() {
+package utilities;
+
+public class HelpMessageBuilder {
+    public static String getHelpMessage() {
         return "```" +
                 "!ping: Pong! [current ping to bot in ms] \n" +
                 "!bing: Bong! \n" +
