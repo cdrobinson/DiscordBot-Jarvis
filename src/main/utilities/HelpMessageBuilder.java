@@ -1,5 +1,7 @@
-class HelpMessageBuilder {
-    static String getHelpMessage() {
+package utilities;
+
+public class HelpMessageBuilder {
+    public static String getHelpMessage() {
         return "```" +
                 "!ping: Pong! [current ping to bot in ms] \n" +
                 "!bing: Bong! \n" +
@@ -8,13 +10,14 @@ class HelpMessageBuilder {
                 "================BSU Students Only================ \n" +
                 "!chirpchirp: Run this command after registering as a BSU student on the Cardinal Esports Discord server\n" +
                 "================#sr-tracking only================\n" +
-                "[####]: To set your SR, type only your SR into the #sr-tracking channel, ie. 2500\n" +
+                "!srTrack [Battletag]: Has Jarvis track your SR as you play. (SR is updated every 15 minutes and your profile has to be public) \n" +
                 "!session start: Begins an SR tracking session. Will record your SR when the command is ran \n" +
                 "!session current: Tells you the current difference between your SR at the beginning of the session and your current SR \n" +
                 "!session end: Tells you the final difference between your SR at the beginning of the session and your current SR \n" +
                 "!sr [@someone]: Tells you that person's SR and the difference from your current SR \n" +
                 "================#feature-request only================\n" +
                 "!rf [request]: Adds your request to the list\n" +
+                "!rfRepost: Reposts the feature request list in the chat\n" +
                 "================#music only================\n" +
                 ".play: Plays songs from the current queue. Starts playing again if it was previously paused\n" +
                 ".play [url]: Adds a new song to the queue and starts playing if it wasn't playing already\n" +

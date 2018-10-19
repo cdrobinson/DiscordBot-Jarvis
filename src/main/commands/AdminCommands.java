@@ -1,3 +1,5 @@
+package commands;
+
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Game;
@@ -5,9 +7,9 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.util.List;
 
-class AdminCommands {
+public class AdminCommands {
 
-    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event) {
+    public void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event) {
         MessageChannel channel = event.getChannel();
         switch (content) {
             case "!say":
@@ -37,6 +39,8 @@ class AdminCommands {
             case "!playing":
                 jdaApi.getPresence().setGame(Game.playing(content.split("!playing")[1]));
                 channel.sendMessageFormat("I will start playing %s now.", content.split("!playing")[1]).queue();
+                break;
+            default:
                 break;
         }
     }

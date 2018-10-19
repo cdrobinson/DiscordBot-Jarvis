@@ -1,3 +1,5 @@
+import commands.AdminCommands;
+import commands.CommandParser;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -8,30 +10,38 @@ import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import srtracking.SRSession;
+import srtracking.SRTracker;
+import utilities.ConfigManager;
+import utilities.HelpMessageBuilder;
+import utilities.TwitterManager;
+
 import java.util.List;
 
-public class MyListener extends ListenerAdapter {
+public class MainListener extends ListenerAdapter {
 
     private SRTracker srTracker;
     private SRSession srSession;
     private CommandParser commandParser;
     private JDA jdaApi;
-    private TwitterManager twitterManager;
     private AdminCommands adminCommands;
+    private ConfigManager cm;
 
-    MyListener(JDA api) {
+    MainListener(JDA api) {
+        this.cm = new ConfigManager();
         this.jdaApi = api;
         this.adminCommands = new AdminCommands();
         this.commandParser = new CommandParser();
-        this.srTracker = new SRTracker();
+        this.srTracker = new SRTracker(jdaApi);
         this.srSession = new SRSession();
-        this.twitterManager = new TwitterManager();
+        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
+        thread.start();
     }
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
-        if (!event.getGuild().getId().equals("237059614384848896")) return;
+        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
@@ -39,22 +49,10 @@ public class MyListener extends ListenerAdapter {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
-        // We don't want to respond to other bot accounts, including ourselves
-        // getContentRaw() is an atomic getter
-        // getContentDisplay() is a lazy getter which modifies the content for e.g. console view (strip discord formatting)
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             adminCommands.parseCommand(jdaApi, content, event);
         }
         commandParser.parseCommand(jdaApi, content, event, srSession, srTracker);
-        if (content.contains("!tweet")) {
-            String[] tweetContents = content.split("!tweet");
-            String tweetLink = this.twitterManager.createTweet(tweetContents[1]);
-            if (tweetLink == null) {
-                channel.sendMessage("There was an error posting the tweet").queue();
-            } else {
-                channel.sendMessage("The tweet was posted successfully. Here is the link: \r" + tweetLink).queue();
-            }
-        }
     }
 
 
@@ -65,7 +63,7 @@ public class MyListener extends ListenerAdapter {
 
     @Override
     public void onMessageReactionAdd(MessageReactionAddEvent event) {
-        if (!event.getGuild().getId().equals("237059614384848896")) return;
+        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
         if (event.getReactionEmote().isEmote()) {
             Emote reactedEmote = event.getReactionEmote().getEmote();
             event.getChannel().getMessageById(event.getMessageId()).queue((message) -> message.addReaction(reactedEmote).queue());
@@ -77,13 +75,14 @@ public class MyListener extends ListenerAdapter {
 
     @Override
     public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
-        if (!event.getGuild().getId().equals("237059614384848896")) return;
+        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
         event.getReaction().removeReaction().queue();
     }
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-        if (!event.getGuild().getId().equals("237059614384848896")) return;
+        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
+        if (event.getUser().isBot()) return;
         //event.getAuthor().openPrivateChannel(.queue((userPM) -> userPM.sendMessage("Message").queue());
         String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + HelpMessageBuilder.getHelpMessage();
         event.getMember().getUser().openPrivateChannel().queue((userPM) -> userPM.sendMessage(welcomeMessage).queue());

@@ -1,3 +1,5 @@
+package srtracking;
+
 class SRReporter {
 
     String build(String authorAsMention, String title, String cat1Title, Integer cat1Value, String cat2Title, Integer cat2Value, Integer cat3Value) {

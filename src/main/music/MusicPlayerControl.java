@@ -1,3 +1,5 @@
+package music;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -27,9 +29,8 @@ public class MusicPlayerControl extends ListenerAdapter {
     private final AudioPlayerManager playerManager;
     private final Map<String, GuildMusicManager> musicManagers;
 
-    MusicPlayerControl() {
+    public MusicPlayerControl() {
         java.util.logging.Logger.getLogger("org.apache.http.client.protocol.ResponseProcessCookies").setLevel(Level.OFF);
-
         this.playerManager = new DefaultAudioPlayerManager();
         playerManager.registerSourceManager(new YoutubeAudioSourceManager());
         playerManager.registerSourceManager(new SoundCloudAudioSourceManager());

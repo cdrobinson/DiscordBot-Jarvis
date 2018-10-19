@@ -1,13 +1,16 @@
+package interactive;
+
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import utilities.ConfigManager;
+import utilities.FileManager;
 
-
-class FeatureRequester {
+public class FeatureRequester {
 
     private String frChannelId;
     private String pinnedMessageId;
     private String featureList;
 
-    FeatureRequester() {
+    public FeatureRequester() {
         this.frChannelId = null;
         this.pinnedMessageId = null;
         this.featureList = null;
@@ -16,25 +19,43 @@ class FeatureRequester {
 
     private void loadFromFile() {
         FileManager fileManager = new FileManager();
-        String fileContents = fileManager.readFromTextFile("FrontLine_featureList.txt");
+        String fileContents = fileManager.readFromTextFile(new ConfigManager().getProperty("guildName") + "_featureList.txt");
         if (fileContents != null) {
             String[] featureList = fileContents.split("\n");
             this.frChannelId = featureList[0];
             this.pinnedMessageId = featureList[1];
-            this.featureList = featureList[2];
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(featureList[2]);
+            for (int i = 3; i < featureList.length; i++) {
+                stringBuilder.append("\n");
+                stringBuilder.append(featureList[i]);
+            }
+            this.featureList = stringBuilder.toString();
         }
     }
 
     private void saveFile() {
         FileManager fileManager = new FileManager();
-        String fileName = "FrontLine_featureList.txt";
+        String fileName = new ConfigManager().getProperty("guildName") + "_featureList.txt";
         String fileContents = this.frChannelId + "\n" +
                 this.pinnedMessageId + "\n" +
                 this.featureList;
         fileManager.writeToTextFile(fileContents, fileName);
     }
 
-    void addRequest(String request, MessageReceivedEvent event) {
+    public void repostFeatureList(MessageReceivedEvent event) {
+        event.getGuild().getTextChannelById(frChannelId).getMessageById(pinnedMessageId).queue((pinnedMessage) -> {
+            pinnedMessage.unpin().queue();
+            pinnedMessage.delete().queue();
+        });
+        event.getGuild().getTextChannelById(this.frChannelId).sendMessage(this.featureList).queue((newMessage) -> {
+            this.pinnedMessageId = newMessage.getId();
+            newMessage.pin().queue();
+            saveFile();
+        });
+    }
+
+    public void addRequest(String request, MessageReceivedEvent event) {
         StringBuilder stringBuilder = new StringBuilder();
         if (this.pinnedMessageId == null) {
             event.getChannel().sendMessage("A feature list hasn't been setup yet. Please run !rfSetup first").queue();
@@ -53,7 +74,7 @@ class FeatureRequester {
         }
     }
 
-    void denyRequest(MessageReceivedEvent event, String requestString) {
+    public void denyRequest(MessageReceivedEvent event, String requestString) {
         Integer requestNumber;
         try {
             requestNumber = Integer.valueOf(requestString);
@@ -83,7 +104,7 @@ class FeatureRequester {
         });
     }
 
-    void approveRequest(MessageReceivedEvent event, String requestString) {
+    public void approveRequest(MessageReceivedEvent event, String requestString) {
         Integer requestNumber;
         try {
             requestNumber = Integer.valueOf(requestString);
