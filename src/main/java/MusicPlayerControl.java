@@ -86,15 +86,18 @@ public class MusicPlayerControl extends ListenerAdapter {
                 }
             } else    //Commands has 2 parts, .play and url.
             {
+                event.getChannel().sendTyping().queue();
                 guild.getAudioManager().setSendingHandler(guildMusicManager.sendHandler);
                 guild.getAudioManager().openAudioConnection(event.getMember().getVoiceState().getChannel());
                 loadAndPlay(guildMusicManager, event.getChannel(), command[1], false);
             }
         } else if (".pplay".equals(command[0]) && command.length == 2) {
+            event.getChannel().sendTyping().queue();
             guild.getAudioManager().setSendingHandler(guildMusicManager.sendHandler);
             guild.getAudioManager().openAudioConnection(event.getMember().getVoiceState().getChannel());
             loadAndPlay(guildMusicManager, event.getChannel(), command[1], true);
         } else if (".skip".equals(command[0])) {
+            event.getChannel().sendTyping().queue();
             scheduler.nextTrack();
             event.getChannel().sendMessage("The current track was skipped.").queue();
         } else if (".pause".equals(command[0])) {

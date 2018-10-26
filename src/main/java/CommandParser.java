@@ -15,16 +15,12 @@ class CommandParser {
         this.featureRequester = new FeatureRequester();
     }
 
-    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
-        String lcContent = content.toLowerCase();
+    void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
+        String lcContent = contentString.toLowerCase();
         FileManager fileManager = new FileManager();
-        String[] contentString = content.split(" ");
-        String command = contentString[0].toLowerCase();
+        String[] contentList = contentString.split(" ");
+        String command = contentList[0].toLowerCase();
         MessageChannel channel = event.getChannel();
-
-        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
-            srTracker.parseCommand(contentString, event, srSession);
-        }
 
         if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
             if ("!rf".equals(command)) {
@@ -89,12 +85,6 @@ class CommandParser {
             }
         } else if ("gruhz".equals(command)) {
             channel.sendMessage("Fuck off, Oly").queue();
-        } else if ("!testing".equals(command)) {
-            channel.sendMessage("Let me check that for you...").queue();
-            if (contentString.length > 1) {
-                String srCheck = ProfileReader.getSR(contentString[1]);
-                channel.sendMessage(srCheck).queue();
-            }
         } else if ("!chirpchirp".equals(command)) {
             List<Guild> mutualGuilds = event.getMember().getUser().getMutualGuilds();
             for (Guild guild : mutualGuilds) {

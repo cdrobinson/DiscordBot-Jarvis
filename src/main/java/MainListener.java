@@ -38,10 +38,16 @@ public class MainListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
+        String[] contentList = content.split(" ");
         if (event.isFromType(ChannelType.TEXT)) {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
+
+        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
+            srTracker.parseCommand(contentList, event, srSession);
+        }
+
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             adminCommands.parseCommand(jdaApi, content, event);
         }
