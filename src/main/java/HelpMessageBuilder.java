@@ -8,11 +8,10 @@ class HelpMessageBuilder {
                 "================BSU Students Only================ \n" +
                 "!chirpchirp: Run this command after registering as a BSU student on the Cardinal Esports Discord server\n" +
                 "================#sr-tracking only================\n" +
-                "!srTrack [Battletag]: Has Jarvis track your SR as you play. (SR is updated every 15 minutes and your profile has to be public) \n" +
-                "!session start: Begins an SR tracking session. Will record your SR when the command is ran \n" +
-                "!session current: Tells you the current difference between your SR at the beginning of the session and your current SR \n" +
-                "!session end: Tells you the final difference between your SR at the beginning of the session and your current SR \n" +
-                "!sr [@someone]: Tells you that person's SR and the difference from your current SR \n" +
+                "!srTrack [Battletag]: Adds your Battletag to the database to have your SR tracked (your profile has to be public) \n" +
+                "!sr <@someone>: Reports the stored SR of either yourself (no parameter) or the person you @'d (currently only accepts discord mentions)\n" +
+                "!updateSR: Forces an update on all of the stored Battletags in the database (may take a while)\n" +
+                "!leaderboard: Shows the current leaderboard based on SR in the database\n" +
                 "================#feature-request only================\n" +
                 "!rf [request]: Adds your request to the list\n" +
                 "!rfRepost: Reposts the feature request list in the chat\n" +

@@ -11,6 +11,7 @@ class OverwatchProfile {
 
     OverwatchProfile(String battleTag) {
         String url = "https://playoverwatch.com/en-us/career/pc/" + battleTag.replaceAll("#", "-");
+        System.out.println(url);
         Document doc = null;
         try {
             doc = Jsoup.connect(url).get();

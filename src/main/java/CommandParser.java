@@ -15,7 +15,7 @@ class CommandParser {
         this.featureRequester = new FeatureRequester();
     }
 
-    void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event, SRSession srSession, SRTracker srTracker) {
+    void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event) {
         String lcContent = contentString.toLowerCase();
         FileManager fileManager = new FileManager();
         String[] contentList = contentString.split(" ");
@@ -99,6 +99,9 @@ class CommandParser {
             }
         } else if ("!vote".equals(command)) {
             UserInputManager.createPoll(event);
+        } else if ("!feed".equals(command)) {
+            event.getMessage().addReaction("\uD83D\uDEE2").queue();
+            channel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
         }
 
         //Multi word commands

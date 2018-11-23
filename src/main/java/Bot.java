@@ -18,6 +18,7 @@ public class Bot {
         } catch (InterruptedException | LoginException e) {
             e.printStackTrace();
             System.out.println("There was an error loading the bot. There was an Interrupted Exception error");
+            System.exit(0);
         }
     }
 }
