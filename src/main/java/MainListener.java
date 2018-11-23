@@ -13,8 +13,6 @@ import java.util.List;
 
 public class MainListener extends ListenerAdapter {
 
-    private SRTracker srTracker;
-    private SRSession srSession;
     private CommandParser commandParser;
     private JDA jdaApi;
     private AdminCommands adminCommands;
@@ -25,8 +23,6 @@ public class MainListener extends ListenerAdapter {
         this.jdaApi = api;
         this.adminCommands = new AdminCommands();
         this.commandParser = new CommandParser();
-        this.srTracker = new SRTracker(jdaApi);
-        this.srSession = new SRSession();
         Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
         thread.start();
     }
@@ -38,14 +34,21 @@ public class MainListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
+        String[] contentList = content.split(" ");
         if (event.isFromType(ChannelType.TEXT)) {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
+
+        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
+            Thread srTrackerThread = new Thread(new SRTracker(event));
+            srTrackerThread.start();
+        }
+
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             adminCommands.parseCommand(jdaApi, content, event);
         }
-        commandParser.parseCommand(jdaApi, content, event, srSession, srTracker);
+        commandParser.parseCommand(jdaApi, content, event);
     }
 
 
