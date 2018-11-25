@@ -44,7 +44,10 @@ public class MainListener extends ListenerAdapter {
             Thread srTrackerThread = new Thread(new SRTracker(event));
             srTrackerThread.start();
         }
-
+        if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
+            Thread featureRequestThread = new Thread(new FeatureRequester(event));
+            featureRequestThread.start();
+        }
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
             adminCommands.parseCommand(jdaApi, content, event);
         }
