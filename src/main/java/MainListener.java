@@ -5,8 +5,6 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.util.List;
@@ -34,12 +32,10 @@ public class MainListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
-        String[] contentList = content.split(" ");
         if (event.isFromType(ChannelType.TEXT)) {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
-
         if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
             Thread srTrackerThread = new Thread(new SRTracker(event));
             srTrackerThread.start();
@@ -58,24 +54,6 @@ public class MainListener extends ListenerAdapter {
     @Override
     public void onGenericMessageReaction(GenericMessageReactionEvent event) {
 
-    }
-
-    @Override
-    public void onMessageReactionAdd(MessageReactionAddEvent event) {
-        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
-        if (event.getReactionEmote().isEmote()) {
-            Emote reactedEmote = event.getReactionEmote().getEmote();
-            event.getChannel().getMessageById(event.getMessageId()).queue((message) -> message.addReaction(reactedEmote).queue());
-        } else {
-            String reactedEmoji = event.getReactionEmote().getName();
-            event.getChannel().getMessageById(event.getMessageId()).queue((message) -> message.addReaction(reactedEmoji).queue());
-        }
-    }
-
-    @Override
-    public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
-        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
-        event.getReaction().removeReaction().queue();
     }
 
     @Override
