@@ -1,4 +1,4 @@
-class HelpMessageBuilder {
+class Util_HelpMessageBuilder {
     static String getHelpMessage() {
         return "```" +
                 "!ping: Pong! [current ping to bot in ms] \n" +

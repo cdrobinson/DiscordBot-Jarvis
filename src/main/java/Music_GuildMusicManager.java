@@ -16,7 +16,7 @@ class Music_GuildMusicManager {
     /**
      * Wrapper around AudioPlayer to use it as an AudioSendHandler.
      */
-    final AudioPlayerSendHandler sendHandler;
+    final Music_AudioPlayerSendHandler sendHandler;
 
     /**
      * Creates a player and a track scheduler.
@@ -26,7 +26,7 @@ class Music_GuildMusicManager {
     Music_GuildMusicManager(AudioPlayerManager manager) {
         player = manager.createPlayer();
         scheduler = new Music_TrackScheduler(player);
-        sendHandler = new AudioPlayerSendHandler(player);
+        sendHandler = new Music_AudioPlayerSendHandler(player);
         player.addListener(scheduler);
     }
 }

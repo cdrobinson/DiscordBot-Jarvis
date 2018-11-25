@@ -1,6 +1,6 @@
 import java.io.File;
 
-class FileManager {
+class Util_FileManager {
 
     File getFile(String fileName) {
         try {

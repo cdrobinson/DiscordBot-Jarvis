@@ -21,7 +21,7 @@ public class MainListener extends ListenerAdapter {
         this.jdaApi = api;
         this.adminCommands = new AdminCommands();
         this.commandParser = new CommandParser();
-        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
+        Thread thread = new Thread(new Twitter_Manager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
         thread.start();
     }
 
@@ -61,7 +61,7 @@ public class MainListener extends ListenerAdapter {
         if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
         if (event.getUser().isBot()) return;
         //event.getAuthor().openPrivateChannel(.queue((userPM) -> userPM.sendMessage("Message").queue());
-        String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + HelpMessageBuilder.getHelpMessage();
+        String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + Util_HelpMessageBuilder.getHelpMessage();
         event.getMember().getUser().openPrivateChannel().queue((userPM) -> userPM.sendMessage(welcomeMessage).queue());
         List<Guild> mutualGuilds = event.getUser().getMutualGuilds();
         for (Guild guild : mutualGuilds) {

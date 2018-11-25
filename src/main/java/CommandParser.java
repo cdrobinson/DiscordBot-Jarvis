@@ -17,7 +17,7 @@ class CommandParser {
 
     void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event) {
         String lcContent = contentString.toLowerCase();
-        FileManager fileManager = new FileManager();
+        Util_FileManager fileManager = new Util_FileManager();
         String[] contentList = contentString.split(" ");
         String command = contentList[0].toLowerCase();
         MessageChannel channel = event.getChannel();
@@ -27,7 +27,7 @@ class CommandParser {
         } else if ("!bing".equals(command)) {
             channel.sendMessage("Bong!").queue();
         } else if ("!help".equals(command)) {
-            channel.sendMessage(HelpMessageBuilder.getHelpMessage()).queue();
+            channel.sendMessage(Util_HelpMessageBuilder.getHelpMessage()).queue();
         } else if ("!scotland".equals(command)) {
             MessageBuilder scotlandBuilder = new MessageBuilder();
             scotlandBuilder.setTTS(true);

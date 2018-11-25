@@ -7,14 +7,14 @@ import net.dv8tion.jda.core.audio.AudioSendHandler;
  * before every call to provide20MsAudio(), we pull the frame in canProvide() and use the frame we already pulled in
  * provide20MsAudio().
  */
-public class AudioPlayerSendHandler implements AudioSendHandler {
+public class Music_AudioPlayerSendHandler implements AudioSendHandler {
     private final AudioPlayer audioPlayer;
     private AudioFrame lastFrame;
 
     /**
      * @param audioPlayer Audio player to wrap.
      */
-    AudioPlayerSendHandler(AudioPlayer audioPlayer) {
+    Music_AudioPlayerSendHandler(AudioPlayer audioPlayer) {
         this.audioPlayer = audioPlayer;
     }
 
