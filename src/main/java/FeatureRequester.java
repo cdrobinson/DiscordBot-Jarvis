@@ -1,144 +1,162 @@
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
-public class FeatureRequester {
+import java.util.List;
+import java.util.Map;
 
-    private String frChannelId;
-    private String latestPinnedMessageId;
-    private String featureList;
+public class FeatureRequester implements Runnable {
 
-    FeatureRequester() {
+    private MessageReceivedEvent event;
+    private GS_FeatureRequestManager gs_featureRequestManager;
+    private static final String headerMessage = "List of requested features:\n"; //⭕=Received | ✔=Added | ❌=Denied\n```\n";
 
-        this.frChannelId = null;
-        this.latestPinnedMessageId = null;
-        this.featureList = null;
-        loadFromFile();
+    FeatureRequester(MessageReceivedEvent passedEvent) {
+        this.event = passedEvent;
+        this.gs_featureRequestManager = new GS_FeatureRequestManager();
     }
 
-    private void loadFromFile() {
-        FileManager fileManager = new FileManager();
-        String fileContents = fileManager.readFromTextFile(new ConfigManager().getProperty("guildName") + "_featureList.txt");
-        if (fileContents != null) {
-            String[] featureList = fileContents.split("\n");
-            this.frChannelId = featureList[0];
-            this.latestPinnedMessageId = featureList[1];
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append(featureList[2]);
-            for (int i = 3; i < featureList.length; i++) {
-                stringBuilder.append("\n");
-                stringBuilder.append(featureList[i]);
-            }
-            this.featureList = stringBuilder.toString();
+    @Override
+    public void run() {
+        Message message = event.getMessage();
+        String content = message.getContentRaw();
+        String[] contentList = content.split(" ");
+        parseCommand(contentList, content);
+    }
+
+    private void parseCommand(String[] contentList, String content) {
+        switch (contentList[0].toLowerCase()) {
+            case "!rf":
+                if (contentList.length > 1) {
+                    addRequest(content.split("!rf ")[1]);
+                } else {
+                    event.getChannel().sendMessage("You forgot to add your request after the command, idiot!").queue();
+                }
+                break;
+            case "!rfrepost":
+                repostFeatureList();
+                break;
+            case "!rfsetup":
+                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    setUp();
+                } else {
+                    event.getChannel().sendMessage("You don't have permission to run that command").queue();
+                }
+                break;
+            case "!rfapprove":
+                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    if (contentList.length > 1) {
+                        approveRequest(contentList[1]);
+                    } else {
+                        event.getChannel().sendMessage("You forgot to to put which request to approve, come on now...").queue();
+                    }
+                } else {
+                    event.getChannel().sendMessage("You don't have permission to run that command").queue();
+                }
+                break;
+            case "!rfdeny":
+                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    if (contentList.length > 1) {
+                        denyRequest(contentList[1]);
+                    } else {
+                        event.getChannel().sendMessage("You forgot to to put which request to deny, come on now...").queue();
+                    }
+                } else {
+                    event.getChannel().sendMessage("You don't have permission to run that command").queue();
+                }
+                break;
+            default:
+                break;
         }
     }
 
-    private void saveFile() {
-        FileManager fileManager = new FileManager();
-        String fileName = new ConfigManager().getProperty("guildName") + "_featureList.txt";
-        String fileContents = this.frChannelId + "\n" +
-                this.latestPinnedMessageId + "\n" +
-                this.featureList;
-        fileManager.writeToTextFile(fileContents, fileName);
-    }
-
-    void repostFeatureList(MessageReceivedEvent event) {
-        event.getGuild().getTextChannelById(frChannelId).getMessageById(latestPinnedMessageId).queue((pinnedMessage) -> {
+    private void repostFeatureList() {
+        Map<String, String> postDetails = gs_featureRequestManager.getPostDetails();
+        event.getGuild().getTextChannelsByName(postDetails.get("Channel"), true).get(0).getMessageById(postDetails.get("ID")).queue((pinnedMessage) -> {
             pinnedMessage.unpin().queue();
             pinnedMessage.delete().queue();
         });
-        event.getGuild().getTextChannelById(this.frChannelId).sendMessage(this.featureList).queue((newMessage) -> {
-            this.latestPinnedMessageId = newMessage.getId();
+        final String frChannelName = postDetails.get("Channel");
+        event.getGuild().getTextChannelsByName(frChannelName, true).get(0).sendMessage(getFormattedFeatureList()).queue((newMessage) -> {
+            gs_featureRequestManager.updatePostDetails(newMessage.getId(), frChannelName);
             newMessage.pin().queue();
-            saveFile();
         });
+
     }
 
-    void addRequest(String request, MessageReceivedEvent event) {
-        StringBuilder stringBuilder = new StringBuilder();
-        if (this.latestPinnedMessageId == null) {
+    private void addRequest(String request) {
+        Map<String, String> postDetails = gs_featureRequestManager.getPostDetails();
+        if (postDetails == null) {
             event.getChannel().sendMessage("A feature list hasn't been setup yet. Please run !rfSetup first").queue();
         } else {
-            event.getGuild().getTextChannelById(frChannelId).getMessageById(latestPinnedMessageId).queue((pinnedMessage) -> {
-                stringBuilder.append(pinnedMessage.getContentRaw());
-                stringBuilder.delete(stringBuilder.length() - 3, stringBuilder.length());
-                stringBuilder.append("⭕");
-                stringBuilder.append(request);
-                stringBuilder.append("\n");
-                stringBuilder.append("```");
-                pinnedMessage.editMessage(stringBuilder.toString()).queue();
-                this.featureList = stringBuilder.toString();
-                saveFile();
-            });
+            gs_featureRequestManager.addRequest(event.getAuthor().getId(),
+                    event.getMember().getEffectiveName(),
+                    request);
+            event.getGuild().getTextChannelsByName(postDetails.get("Channel"), true).get(0)
+                    .getMessageById(postDetails.get("ID")).queue((pinnedMessage) ->
+                    pinnedMessage.editMessage(getFormattedFeatureList()).queue());
         }
     }
 
-    void denyRequest(MessageReceivedEvent event, String requestString) {
-        Integer requestNumber;
-        try {
-            requestNumber = Integer.valueOf(requestString);
-        } catch (NumberFormatException e) {
-            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
-            return;
+    private String getFormattedFeatureList(){
+        List<FR_Request> frRequests = gs_featureRequestManager.getAllFeatureRequests();
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(headerMessage);
+        stringBuilder.append("```");
+        for (FR_Request frRequest : frRequests) {
+            stringBuilder.append(frRequests.indexOf(frRequest));
+            stringBuilder.append(" | ");
+            stringBuilder.append(frRequest.getApprovalStatus());
+            stringBuilder.append(" | ");
+            stringBuilder.append(event.getGuild().getMemberById(frRequest.getRequesterID()).getEffectiveName());
+            stringBuilder.append(" | ");
+            stringBuilder.append(frRequest.getRequest());
+            stringBuilder.append("\n");
         }
-        StringBuilder updatedMessage = new StringBuilder();
-        updatedMessage.append("List of requested features:\n⭕=Received | ✔=Added | ❌=Denied\n");
-        event.getChannel().getMessageById(latestPinnedMessageId).queue((pinnedMessage) -> {
-            String cleanRequests = pinnedMessage.getContentRaw().split("```")[1];
-            String[] requestList = cleanRequests.split("\n");
-            if (requestNumber > requestList.length || requestNumber < 1) {
-                event.getChannel().sendMessageFormat("The feature you requested, %s, is not a valid feature number.", requestNumber).queue();
-            } else {
-                requestList[requestNumber] = requestList[requestNumber].replaceFirst("⭕", "❌");
-                updatedMessage.append("```");
-                for (String request : requestList) {
-                    updatedMessage.append(request);
-                    updatedMessage.append("\n");
-                }
-                updatedMessage.append("```");
-                pinnedMessage.editMessage(updatedMessage.toString()).queue();
-                this.featureList = updatedMessage.toString();
-                saveFile();
-            }
-        });
+        stringBuilder.append("```");
+        return stringBuilder.toString();
     }
 
-    void approveRequest(MessageReceivedEvent event, String requestString) {
-        Integer requestNumber;
-        try {
-            requestNumber = Integer.valueOf(requestString);
-        } catch (NumberFormatException e) {
-            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
-            return;
-        }
-        StringBuilder updatedMessage = new StringBuilder();
-        updatedMessage.append("List of requested features:\n⭕=Received | ✔=Added | ❌=Denied\n");
-        event.getChannel().getMessageById(latestPinnedMessageId).queue((pinnedMessage) -> {
-            String cleanRequests = pinnedMessage.getContentRaw().split("```")[1];
-            String[] requestList = cleanRequests.split("\n");
-            if (requestNumber > requestList.length || requestNumber < 1) {
-                event.getChannel().sendMessageFormat("The feature you requested, %s, is not a valid feature number.", requestNumber).queue();
-            } else {
-                requestList[requestNumber] = requestList[requestNumber].replaceFirst("⭕", "✔");
-                updatedMessage.append("```");
-                for (String request : requestList) {
-                    updatedMessage.append(request);
-                    updatedMessage.append("\n");
-                }
-                updatedMessage.append("```");
-                pinnedMessage.editMessage(updatedMessage.toString()).queue();
-                this.featureList = updatedMessage.toString();
-                saveFile();
-            }
-        });
-    }
-
-    public void setUp(MessageReceivedEvent event) {
-        String setupMessage = "List of requested features:\n⭕=Received | ✔=Added | ❌=Denied\n```\n```";
-        event.getChannel().sendMessage(setupMessage).queue((featureListMessage) -> {
-            this.latestPinnedMessageId = featureListMessage.getId();
+    private void setUp() {
+        final String frChannelName = new ConfigManager().getProperty("featureRequestChannelName");
+        event.getChannel().sendMessage(getFormattedFeatureList()).queue((featureListMessage) -> {
+            gs_featureRequestManager.updatePostDetails(featureListMessage.getId(), frChannelName);
             featureListMessage.pin().queue();
-            this.frChannelId = event.getChannel().getId();
-            this.featureList = setupMessage;
-            saveFile();
         });
+
+    }
+
+    private void updatePost(){
+        event.getChannel().getMessageById(gs_featureRequestManager.getPostDetails().get("ID")).queue((pinnedMessage) -> pinnedMessage.editMessage(getFormattedFeatureList()).queue());
+    }
+
+    private void denyRequest(String commandContent) {
+        int position;
+        try {
+            position = Integer.parseInt(commandContent);
+            position = position + 2;
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
+            return;
+        }
+        List<List<Object>> values = gs_featureRequestManager.getRequestValues(Integer.toString(position));
+        values.get(0).set(0, "Denied");
+        gs_featureRequestManager.setRequestValues(Integer.toString(position), values);
+        updatePost();
+    }
+
+    private void approveRequest(String commandContent) {
+        int position;
+        try {
+            position = Integer.parseInt(commandContent);
+            position = position + 2;
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
+            return;
+        }
+        List<List<Object>> values = gs_featureRequestManager.getRequestValues(Integer.toString(position));
+        values.get(0).set(0, "Approved");
+        gs_featureRequestManager.setRequestValues(Integer.toString(position), values);
+        updatePost();
     }
 }

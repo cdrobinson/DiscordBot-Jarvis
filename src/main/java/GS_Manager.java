@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.Set;
 
 
-class GoogleSheetsManager {
+class GS_Manager {
     private static final String APPLICATION_NAME = "Overwatch SR Bot";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final Set<String> SCOPES = Collections.singleton(SheetsScopes.SPREADSHEETS);
@@ -24,11 +24,11 @@ class GoogleSheetsManager {
     //Must have editor access to the Google Sheet
     private static final String serviceAccountUser = "discordbot@overwatch-sr-bot-1542389554492.iam.gserviceaccount.com";
 
-    GoogleSheetsManager() {
+    GS_Manager() {
         try {
             final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
             GoogleCredential googleCredential = GoogleCredential
-                    .fromStream(GoogleSheetsManager.class.getResourceAsStream(CREDENTIALS_FILE_PATH))
+                    .fromStream(GS_Manager.class.getResourceAsStream(CREDENTIALS_FILE_PATH))
                     .createScoped(SCOPES);
             GoogleCredential.Builder credentialBuilder = new GoogleCredential.Builder()
                     .setTransport(HTTP_TRANSPORT)
@@ -42,7 +42,7 @@ class GoogleSheetsManager {
             service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credentialBuilder.build()).setApplicationName(APPLICATION_NAME).build();
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
-            System.out.println("There was an error creating the GoogleSheetsManager");
+            System.out.println("There was an error creating the GS_Manager");
         }
     }
 

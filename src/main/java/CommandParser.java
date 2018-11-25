@@ -1,6 +1,5 @@
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -9,10 +8,8 @@ import java.util.List;
 
 class CommandParser {
 
-    private FeatureRequester featureRequester;
 
     CommandParser() {
-        this.featureRequester = new FeatureRequester();
     }
 
     void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event) {
@@ -21,24 +18,6 @@ class CommandParser {
         String[] contentList = contentString.split(" ");
         String command = contentList[0].toLowerCase();
         MessageChannel channel = event.getChannel();
-
-        if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
-            if ("!rf".equals(command)) {
-                featureRequester.addRequest(event.getMessage().getContentDisplay().split("!rf ")[1], event);
-            } else if ("!rfrepost".equals(command)) {
-                featureRequester.repostFeatureList(event);
-            }
-            if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
-                if ("!rfsetup".equals(command)) {
-                    featureRequester.setUp(event);
-                    event.getMessage().delete().queue();
-                } else if ("!rfdeny".equals(command)) {
-                    featureRequester.denyRequest(event, lcContent.split("!rfdeny ")[1]);
-                } else if ("!rfapprove".equals(command)) {
-                    featureRequester.approveRequest(event, lcContent.split("!rfapprove ")[1]);
-                }
-            }
-        }
 
         if ("!ping".equals(command)) {
             channel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();

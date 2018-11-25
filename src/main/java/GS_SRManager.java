@@ -7,14 +7,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 class GS_SRManager {
-    
+
     private static Sheets service;
     private static String spreadsheetId;
 
     GS_SRManager(){
-        GoogleSheetsManager googleSheetsManager = new GoogleSheetsManager();
-        service = googleSheetsManager.getSheet();
-        spreadsheetId = googleSheetsManager.getSpreadsheetId();
+        GS_Manager GSManager = new GS_Manager();
+        service = GSManager.getSheet();
+        spreadsheetId = GSManager.getSpreadsheetId();
     }
 
     List<SRDatabaseUser> getFullSRDatabase(){
