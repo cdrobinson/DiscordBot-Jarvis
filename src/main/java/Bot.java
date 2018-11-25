@@ -11,7 +11,7 @@ public class Bot {
         ConfigManager configManager = new ConfigManager();
         JDA api = new JDABuilder(AccountType.BOT).setToken(configManager.getProperty("botToken")).build().awaitReady();
         api.addEventListener(new MainListener(api));
-        api.addEventListener(new MusicPlayerControl());
+        api.addEventListener(new Music_MusicPlayerControl());
         api.setAutoReconnect(true);
         api.getPresence().setGame(Game.playing(configManager.getProperty("defaultPlaying")));
     }

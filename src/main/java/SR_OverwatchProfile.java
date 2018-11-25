@@ -4,12 +4,12 @@ import org.jsoup.select.Elements;
 
 import java.io.IOException;
 
-class OverwatchProfile {
+class SR_OverwatchProfile {
 
     private String userSR;
     private String response;
 
-    OverwatchProfile(String battleTag) {
+    SR_OverwatchProfile(String battleTag) {
         String url = "https://playoverwatch.com/en-us/career/pc/" + battleTag.replaceAll("#", "-");
         System.out.println(url);
         Document doc = null;

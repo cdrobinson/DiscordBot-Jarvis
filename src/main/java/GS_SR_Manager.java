@@ -6,18 +6,18 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class GS_SRManager {
+class GS_SR_Manager {
 
     private static Sheets service;
     private static String spreadsheetId;
 
-    GS_SRManager(){
+    GS_SR_Manager(){
         GS_Manager GSManager = new GS_Manager();
         service = GSManager.getSheet();
         spreadsheetId = GSManager.getSpreadsheetId();
     }
 
-    List<SRDatabaseUser> getFullSRDatabase(){
+    List<SR_DatabaseUser> getFullSRDatabase(){
         final String readRange = "SRTracking!A2:D";
         ValueRange response;
         List<List<Object>> values = null;
@@ -34,9 +34,9 @@ class GS_SRManager {
             System.out.println("No data found.");
             return null;
         } else {
-            List<SRDatabaseUser> databaseValues = new ArrayList<>();
+            List<SR_DatabaseUser> databaseValues = new ArrayList<>();
             for (List<Object> row : values) {
-                SRDatabaseUser srDatabaseUser = new SRDatabaseUser(
+                SR_DatabaseUser srDatabaseUser = new SR_DatabaseUser(
                         row.get(1).toString(),
                         row.get(2).toString(),
                         Integer.valueOf(row.get(3).toString())

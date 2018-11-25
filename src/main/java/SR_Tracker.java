@@ -6,10 +6,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-class SRTracker implements Runnable {
+class SR_Tracker implements Runnable {
     private MessageReceivedEvent event;
 
-    SRTracker(MessageReceivedEvent event) {
+    SR_Tracker(MessageReceivedEvent event) {
         this.event = event;
     }
 
@@ -41,14 +41,14 @@ class SRTracker implements Runnable {
     }
 
     private void getLeaderboard(){
-        GS_SRManager gs_srManager = new GS_SRManager();
-        List<SRDatabaseUser> databaseData = gs_srManager.getFullSRDatabase();
-        Comparator<SRDatabaseUser> databaseComparator = Comparator.comparing(SRDatabaseUser::getSR);
+        GS_SR_Manager gs_srManager = new GS_SR_Manager();
+        List<SR_DatabaseUser> databaseData = gs_srManager.getFullSRDatabase();
+        Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getSR);
         databaseData.sort(databaseComparator);
         Collections.reverse(databaseData);
         StringBuilder leaderboardString = new StringBuilder();
         leaderboardString.append("**=====================**\n");
-        for (SRDatabaseUser user : databaseData) {
+        for (SR_DatabaseUser user : databaseData) {
             String username = event.getGuild().getMemberById(user.getDiscordID()).getEffectiveName();
             String battletag = user.getBattletag();
             String userSr = user.getSR().toString();
@@ -66,10 +66,10 @@ class SRTracker implements Runnable {
 
     private void updateSRDatabase() {
         MessageChannel channel = event.getChannel();
-        GS_SRManager gs_srManager = new GS_SRManager();
+        GS_SR_Manager gs_srManager = new GS_SR_Manager();
         List<String> allBattletags = gs_srManager.getAllBattletags();
         for (String battletag : allBattletags) {
-            OverwatchProfile overwatchProfile = new OverwatchProfile(battletag);
+            SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(battletag);
             System.out.println(overwatchProfile.getSR());
             gs_srManager.updateUserSRByBattletag(battletag, overwatchProfile.getSR());
         }
@@ -89,7 +89,7 @@ class SRTracker implements Runnable {
                 lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
             }
             String lookUpSR;
-            GS_SRManager gs_srManager = new GS_SRManager();
+            GS_SR_Manager gs_srManager = new GS_SR_Manager();
             lookUpSR = gs_srManager.getUserSRByDiscordID(lookUpID);
             if (lookUpSR ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
@@ -99,7 +99,7 @@ class SRTracker implements Runnable {
             channel.sendMessageFormat("%s's stored SR is currently %s", lookUpName, lookUpSR).queue();
         } else {
             String authorSR;
-            GS_SRManager gs_srManager = new GS_SRManager();
+            GS_SR_Manager gs_srManager = new GS_SR_Manager();
             authorSR = gs_srManager.getUserSRByDiscordID(authorID);
             if (authorSR != null) {
                 channel.sendMessage("Your stored SR is currently: " + authorSR).queue();
@@ -117,7 +117,7 @@ class SRTracker implements Runnable {
         }
         channel.sendMessage("Registering....").queue();
         channel.sendTyping().queue();
-        OverwatchProfile overwatchProfile = new OverwatchProfile(contentString[1]);
+        SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(contentString[1]);
         String userSR = overwatchProfile.getSR();
         try {
             Integer.valueOf(userSR);
@@ -140,7 +140,7 @@ class SRTracker implements Runnable {
     }
 
     private String addToFile(String userDiscordName, String userID, String battletag, String userSR) {
-        GS_SRManager gs_srManager = new GS_SRManager();
+        GS_SR_Manager gs_srManager = new GS_SR_Manager();
         boolean added = gs_srManager.addUserToSRTracking(userDiscordName, userID, battletag, userSR);
         if (added) {
             System.out.printf("%s has registered %s as their Battletag with an SR of %s", userID, battletag, userSR);

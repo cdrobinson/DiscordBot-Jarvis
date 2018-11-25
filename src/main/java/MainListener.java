@@ -37,11 +37,11 @@ public class MainListener extends ListenerAdapter {
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
         if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
-            Thread srTrackerThread = new Thread(new SRTracker(event));
+            Thread srTrackerThread = new Thread(new SR_Tracker(event));
             srTrackerThread.start();
         }
         if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
-            Thread featureRequestThread = new Thread(new FeatureRequester(event));
+            Thread featureRequestThread = new Thread(new FR_FeatureRequester(event));
             featureRequestThread.start();
         }
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
