@@ -68,6 +68,7 @@ public class Twitter_Manager implements Runnable {
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                System.exit(0);
             }
         }
     }
