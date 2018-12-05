@@ -49,8 +49,8 @@ class SR_Manager implements Runnable {
     private void postDiscordNameFromBattletag(String[] contentString) {
         MessageChannel channel = event.getChannel();
         if (contentString.length > 1) {
-            GS_Manager GSManager = new GS_Manager();
-            String lookupDiscordID = GSManager.getUserDiscordIDByBattletag(contentString[1]);
+            GS_SR_Manager gs_sr_manager = new GS_SR_Manager();
+            String lookupDiscordID = gs_sr_manager.getUserDiscordIDByBattletag(contentString[1]);
             if (lookupDiscordID ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
                 return;
@@ -75,7 +75,7 @@ class SR_Manager implements Runnable {
                 lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
             }
             String lookupBattletag;
-            GS_Manager GSManager = new GS_Manager();
+            GS_SR_Manager GSManager = new GS_SR_Manager();
             lookupBattletag = GSManager.getUserBattletagByDiscordID(lookUpID);
             if (lookupBattletag ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
@@ -85,7 +85,7 @@ class SR_Manager implements Runnable {
             channel.sendMessageFormat("%s's stored battletag is %s", lookUpName, lookupBattletag).queue();
         } else {
             String authorBattletag;
-            GS_Manager GSManager = new GS_Manager();
+            GS_SR_Manager GSManager = new GS_SR_Manager();
             authorBattletag = GSManager.getUserBattletagByDiscordID(authorID);
             if (authorBattletag != null) {
                 channel.sendMessage("Your stored battletag is currently: " + authorBattletag).queue();
@@ -96,7 +96,7 @@ class SR_Manager implements Runnable {
     }
 
     private void getLeaderboard(){
-        GS_Manager GSManager = new GS_Manager();
+        GS_SR_Manager GSManager = new GS_SR_Manager();
         List<SR_DatabaseUser> databaseData = GSManager.getFullDatabase();
         Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getSR);
         databaseData.sort(databaseComparator);
@@ -121,7 +121,7 @@ class SR_Manager implements Runnable {
 
     private void updateSRDatabase() {
         MessageChannel channel = event.getChannel();
-        GS_Manager GSManager = new GS_Manager();
+        GS_SR_Manager GSManager = new GS_SR_Manager();
         List<String> allBattletags = GSManager.getAllBattletags();
         for (String battletag : allBattletags) {
             SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(battletag);
@@ -144,7 +144,7 @@ class SR_Manager implements Runnable {
                 lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
             }
             String lookUpSR;
-            GS_Manager GSManager = new GS_Manager();
+            GS_SR_Manager GSManager = new GS_SR_Manager();
             lookUpSR = GSManager.getUserSRByDiscordID(lookUpID);
             if (lookUpSR ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
@@ -154,7 +154,7 @@ class SR_Manager implements Runnable {
             channel.sendMessageFormat("%s's stored SR is currently %s", lookUpName, lookUpSR).queue();
         } else {
             String authorSR;
-            GS_Manager GSManager = new GS_Manager();
+            GS_SR_Manager GSManager = new GS_SR_Manager();
             authorSR = GSManager.getUserSRByDiscordID(authorID);
             if (authorSR != null) {
                 channel.sendMessage("Your stored SR is currently: " + authorSR).queue();
@@ -195,7 +195,7 @@ class SR_Manager implements Runnable {
     }
 
     private String addToFile(String userDiscordName, String userID, String battletag, String userSR) {
-        GS_Manager GSManager = new GS_Manager();
+        GS_SR_Manager GSManager = new GS_SR_Manager();
         boolean added = GSManager.addSRTracking(userDiscordName, userID, battletag, userSR);
         if (added) {
             System.out.printf("%s has registered %s as their Battletag with an SR of %s", userID, battletag, userSR);
