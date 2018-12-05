@@ -37,7 +37,7 @@ public class MainListener extends ListenerAdapter {
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
         if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
-            Thread srTrackerThread = new Thread(new SR_Tracker(event));
+            Thread srTrackerThread = new Thread(new SR_Manager(event));
             srTrackerThread.start();
         }
         if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
