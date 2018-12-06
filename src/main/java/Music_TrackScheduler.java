@@ -11,7 +11,7 @@ import java.util.Queue;
 /**
  * This class schedules tracks for the audio player. It contains the queue of tracks.
  */
-public class TrackScheduler extends AudioEventAdapter {
+public class Music_TrackScheduler extends AudioEventAdapter {
     private boolean repeating = false;
     private final AudioPlayer player;
     final Queue<AudioTrack> queue;
@@ -20,7 +20,7 @@ public class TrackScheduler extends AudioEventAdapter {
     /**
      * @param player The audio player this scheduler uses
      */
-    TrackScheduler(AudioPlayer player) {
+    Music_TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedList<>();
     }

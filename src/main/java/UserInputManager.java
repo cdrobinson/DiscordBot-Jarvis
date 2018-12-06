@@ -3,7 +3,6 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 class UserInputManager {
 
-
     static void createPoll(MessageReceivedEvent event) {
         String content = event.getMessage().getContentRaw();
         MessageChannel channel = event.getChannel();

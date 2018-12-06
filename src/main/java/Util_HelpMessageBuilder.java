@@ -1,4 +1,4 @@
-class HelpMessageBuilder {
+class Util_HelpMessageBuilder {
     static String getHelpMessage() {
         return "```" +
                 "!ping: Pong! [current ping to bot in ms] \n" +
@@ -8,10 +8,12 @@ class HelpMessageBuilder {
                 "================BSU Students Only================ \n" +
                 "!chirpchirp: Run this command after registering as a BSU student on the Cardinal Esports Discord server\n" +
                 "================#sr-tracking only================\n" +
-                "!srTrack [Battletag]: Adds your Battletag to the database to have your SR tracked (your profile has to be public) \n" +
+                "!registerBattletag [Battletag]: Adds your Battletag to the database to have your SR tracked (your profile has to be public) \n" +
                 "!sr <@someone>: Reports the stored SR of either yourself (no parameter) or the person you @'d (currently only accepts discord mentions)\n" +
                 "!updateSR: Forces an update on all of the stored Battletags in the database (may take a while)\n" +
                 "!leaderboard: Shows the current leaderboard based on SR in the database\n" +
+                "!getBattletag [@someone]: Displays the stored Battletag of the Discord user, if they have registered their Battletag with me\n" +
+                "!getDiscord [Battletag]: Displays the stored Discord name that registered under [Battletag], if they have registered their Battletag with me\n" +
                 "================#feature-request only================\n" +
                 "!rf [request]: Adds your request to the list\n" +
                 "!rfRepost: Reposts the feature request list in the chat\n" +

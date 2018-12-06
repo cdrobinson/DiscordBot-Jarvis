@@ -5,8 +5,6 @@ import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
-import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
-import net.dv8tion.jda.core.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.util.List;
@@ -23,7 +21,7 @@ public class MainListener extends ListenerAdapter {
         this.jdaApi = api;
         this.adminCommands = new AdminCommands();
         this.commandParser = new CommandParser();
-        Thread thread = new Thread(new TwitterManager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
+        Thread thread = new Thread(new Twitter_Manager(jdaApi.getGuildById(cm.getProperty("guildID")).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
         thread.start();
     }
 
@@ -34,18 +32,16 @@ public class MainListener extends ListenerAdapter {
         MessageChannel channel = event.getChannel();
         Message message = event.getMessage();
         String content = message.getContentRaw();
-        String[] contentList = content.split(" ");
         if (event.isFromType(ChannelType.TEXT)) {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
-
         if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
-            Thread srTrackerThread = new Thread(new SRTracker(event));
+            Thread srTrackerThread = new Thread(new SR_Manager(event));
             srTrackerThread.start();
         }
         if (channel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
-            Thread featureRequestThread = new Thread(new FeatureRequester(event));
+            Thread featureRequestThread = new Thread(new FR_FeatureRequester(event));
             featureRequestThread.start();
         }
         if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
@@ -61,29 +57,11 @@ public class MainListener extends ListenerAdapter {
     }
 
     @Override
-    public void onMessageReactionAdd(MessageReactionAddEvent event) {
-        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
-        if (event.getReactionEmote().isEmote()) {
-            Emote reactedEmote = event.getReactionEmote().getEmote();
-            event.getChannel().getMessageById(event.getMessageId()).queue((message) -> message.addReaction(reactedEmote).queue());
-        } else {
-            String reactedEmoji = event.getReactionEmote().getName();
-            event.getChannel().getMessageById(event.getMessageId()).queue((message) -> message.addReaction(reactedEmoji).queue());
-        }
-    }
-
-    @Override
-    public void onMessageReactionRemove(MessageReactionRemoveEvent event) {
-        if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
-        event.getReaction().removeReaction().queue();
-    }
-
-    @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
         if (!event.getGuild().getId().equals(cm.getProperty("guildID"))) return;
         if (event.getUser().isBot()) return;
         //event.getAuthor().openPrivateChannel(.queue((userPM) -> userPM.sendMessage("Message").queue());
-        String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + HelpMessageBuilder.getHelpMessage();
+        String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + Util_HelpMessageBuilder.getHelpMessage();
         event.getMember().getUser().openPrivateChannel().queue((userPM) -> userPM.sendMessage(welcomeMessage).queue());
         List<Guild> mutualGuilds = event.getUser().getMutualGuilds();
         for (Guild guild : mutualGuilds) {

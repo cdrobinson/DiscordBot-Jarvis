@@ -5,15 +5,15 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.util.List;
 import java.util.Map;
 
-public class FeatureRequester implements Runnable {
+public class FR_FeatureRequester implements Runnable {
 
     private MessageReceivedEvent event;
-    private GS_FeatureRequestManager gs_featureRequestManager;
+    private GS_FR_Manager gs_FRManager;
     private static final String headerMessage = "List of requested features:\n"; //⭕=Received | ✔=Added | ❌=Denied\n```\n";
 
-    FeatureRequester(MessageReceivedEvent passedEvent) {
+    FR_FeatureRequester(MessageReceivedEvent passedEvent) {
         this.event = passedEvent;
-        this.gs_featureRequestManager = new GS_FeatureRequestManager();
+        this.gs_FRManager = new GS_FR_Manager();
     }
 
     @Override
@@ -65,31 +65,43 @@ public class FeatureRequester implements Runnable {
                     event.getChannel().sendMessage("You don't have permission to run that command").queue();
                 }
                 break;
+            case "!rffinish":
+                if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                    if (contentList.length > 1) {
+                        finishRequest(contentList[1]);
+                    } else {
+                        event.getChannel().sendMessage("You forgot to to put which request to finish, come on now...").queue();
+                    }
+                } else {
+                    event.getChannel().sendMessage("You don't have permission to run that command").queue();
+                }
+                break;
             default:
                 break;
         }
     }
 
+
     private void repostFeatureList() {
-        Map<String, String> postDetails = gs_featureRequestManager.getPostDetails();
+        Map<String, String> postDetails = gs_FRManager.getPostDetails();
         event.getGuild().getTextChannelsByName(postDetails.get("Channel"), true).get(0).getMessageById(postDetails.get("ID")).queue((pinnedMessage) -> {
             pinnedMessage.unpin().queue();
             pinnedMessage.delete().queue();
         });
         final String frChannelName = postDetails.get("Channel");
         event.getGuild().getTextChannelsByName(frChannelName, true).get(0).sendMessage(getFormattedFeatureList()).queue((newMessage) -> {
-            gs_featureRequestManager.updatePostDetails(newMessage.getId(), frChannelName);
+            gs_FRManager.updatePostDetails(newMessage.getId(), frChannelName);
             newMessage.pin().queue();
         });
 
     }
 
     private void addRequest(String request) {
-        Map<String, String> postDetails = gs_featureRequestManager.getPostDetails();
+        Map<String, String> postDetails = gs_FRManager.getPostDetails();
         if (postDetails == null) {
             event.getChannel().sendMessage("A feature list hasn't been setup yet. Please run !rfSetup first").queue();
         } else {
-            gs_featureRequestManager.addRequest(event.getAuthor().getId(),
+            gs_FRManager.addRequest(event.getAuthor().getId(),
                     event.getMember().getEffectiveName(),
                     request);
             event.getGuild().getTextChannelsByName(postDetails.get("Channel"), true).get(0)
@@ -99,11 +111,24 @@ public class FeatureRequester implements Runnable {
     }
 
     private String getFormattedFeatureList(){
-        List<FR_Request> frRequests = gs_featureRequestManager.getAllFeatureRequests();
+        List<FR_Request> frRequests = gs_FRManager.getAllFeatureRequests();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(headerMessage);
-        stringBuilder.append("```");
+        stringBuilder.append("```diff\n");
         for (FR_Request frRequest : frRequests) {
+            String approvalStatus = frRequest.getApprovalStatus();
+            switch (approvalStatus) {
+                case "Open":
+                case "Approved":
+                    stringBuilder.append("* ");
+                    break;
+                case "Finished":
+                    stringBuilder.append("+ ");
+                    break;
+                case "Denied":
+                    stringBuilder.append("- ");
+                    break;
+            }
             stringBuilder.append(frRequests.indexOf(frRequest));
             stringBuilder.append(" | ");
             stringBuilder.append(frRequest.getApprovalStatus());
@@ -114,20 +139,21 @@ public class FeatureRequester implements Runnable {
             stringBuilder.append("\n");
         }
         stringBuilder.append("```");
+        System.out.println(stringBuilder.toString());
         return stringBuilder.toString();
     }
 
     private void setUp() {
         final String frChannelName = new ConfigManager().getProperty("featureRequestChannelName");
         event.getChannel().sendMessage(getFormattedFeatureList()).queue((featureListMessage) -> {
-            gs_featureRequestManager.updatePostDetails(featureListMessage.getId(), frChannelName);
+            gs_FRManager.updatePostDetails(featureListMessage.getId(), frChannelName);
             featureListMessage.pin().queue();
         });
 
     }
 
     private void updatePost(){
-        event.getChannel().getMessageById(gs_featureRequestManager.getPostDetails().get("ID")).queue((pinnedMessage) -> pinnedMessage.editMessage(getFormattedFeatureList()).queue());
+        event.getChannel().getMessageById(gs_FRManager.getPostDetails().get("ID")).queue((pinnedMessage) -> pinnedMessage.editMessage(getFormattedFeatureList()).queue());
     }
 
     private void denyRequest(String commandContent) {
@@ -139,9 +165,9 @@ public class FeatureRequester implements Runnable {
             event.getChannel().sendMessage("You idiot, that's not a number.").queue();
             return;
         }
-        List<List<Object>> values = gs_featureRequestManager.getRequestValues(Integer.toString(position));
+        List<List<Object>> values = gs_FRManager.getRequestValues(Integer.toString(position));
         values.get(0).set(0, "Denied");
-        gs_featureRequestManager.setRequestValues(Integer.toString(position), values);
+        gs_FRManager.setRequestValues(Integer.toString(position), values);
         updatePost();
     }
 
@@ -154,9 +180,24 @@ public class FeatureRequester implements Runnable {
             event.getChannel().sendMessage("You idiot, that's not a number.").queue();
             return;
         }
-        List<List<Object>> values = gs_featureRequestManager.getRequestValues(Integer.toString(position));
+        List<List<Object>> values = gs_FRManager.getRequestValues(Integer.toString(position));
         values.get(0).set(0, "Approved");
-        gs_featureRequestManager.setRequestValues(Integer.toString(position), values);
+        gs_FRManager.setRequestValues(Integer.toString(position), values);
+        updatePost();
+    }
+
+    private void finishRequest(String commandContent) {
+        int position;
+        try {
+            position = Integer.parseInt(commandContent);
+            position = position + 2;
+        } catch (NumberFormatException e) {
+            event.getChannel().sendMessage("You idiot, that's not a number.").queue();
+            return;
+        }
+        List<List<Object>> values = gs_FRManager.getRequestValues(Integer.toString(position));
+        values.get(0).set(0, "Finished");
+        gs_FRManager.setRequestValues(Integer.toString(position), values);
         updatePost();
     }
 }

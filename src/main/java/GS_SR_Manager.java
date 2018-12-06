@@ -6,24 +6,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-class GS_SRManager {
+class GS_SR_Manager {
 
     private static Sheets service;
     private static String spreadsheetId;
+    private static final String sheetRange = "SRTracking!A2:D";
 
-    GS_SRManager(){
+
+    GS_SR_Manager(){
         GS_Manager GSManager = new GS_Manager();
         service = GSManager.getSheet();
         spreadsheetId = GSManager.getSpreadsheetId();
     }
 
-    List<SRDatabaseUser> getFullSRDatabase(){
-        final String readRange = "SRTracking!A2:D";
+    //TODO: Optimize searching using more of the SR_DatabaseUser class
+    List<SR_DatabaseUser> getFullDatabase(){
         ValueRange response;
         List<List<Object>> values = null;
         try {
             response = service.spreadsheets().values()
-                    .get(spreadsheetId, readRange)
+                    .get(spreadsheetId, sheetRange)
                     .execute();
             values = response.getValues();
         } catch (IOException e) {
@@ -34,9 +36,9 @@ class GS_SRManager {
             System.out.println("No data found.");
             return null;
         } else {
-            List<SRDatabaseUser> databaseValues = new ArrayList<>();
+            List<SR_DatabaseUser> databaseValues = new ArrayList<>();
             for (List<Object> row : values) {
-                SRDatabaseUser srDatabaseUser = new SRDatabaseUser(
+                SR_DatabaseUser srDatabaseUser = new SR_DatabaseUser(
                         row.get(1).toString(),
                         row.get(2).toString(),
                         Integer.valueOf(row.get(3).toString())
@@ -46,14 +48,12 @@ class GS_SRManager {
             return databaseValues;
         }
     }
-
     void updateUserSRByBattletag(String userBattletag, String newSR) {
-        final String range = "SRTracking!A2:D";
         ValueRange response;
         List<List<Object>> values = null;
         try {
             response = service.spreadsheets().values()
-                    .get(spreadsheetId, range)
+                    .get(spreadsheetId, sheetRange)
                     .execute();
             values = response.getValues();
         } catch (IOException e) {
@@ -68,7 +68,7 @@ class GS_SRManager {
                     row.set(3, newSR);
                     ValueRange body = new ValueRange().setValues(values);
                     try {
-                        service.spreadsheets().values().update(spreadsheetId, range, body)
+                        service.spreadsheets().values().update(spreadsheetId, sheetRange, body)
                                 .setValueInputOption("RAW")
                                 .execute();
                     } catch (IOException e) {
@@ -81,12 +81,11 @@ class GS_SRManager {
     }
 
     List<String> getAllBattletags(){
-        final String readRange = "SRTracking!A2:D";
         ValueRange response;
         List<List<Object>> values = null;
         try {
             response = service.spreadsheets().values()
-                    .get(spreadsheetId, readRange)
+                    .get(spreadsheetId, sheetRange)
                     .execute();
             values = response.getValues();
         } catch (IOException e) {
@@ -106,12 +105,11 @@ class GS_SRManager {
     }
 
     String getUserSRByDiscordID(String userDiscordID) {
-        final String readRange = "SRTracking!A1:D";
         ValueRange response;
         List<List<Object>> values = null;
         try {
             response = service.spreadsheets().values()
-                    .get(spreadsheetId, readRange)
+                    .get(spreadsheetId, sheetRange)
                     .execute();
             values = response.getValues();
         } catch (IOException e) {
@@ -138,9 +136,8 @@ class GS_SRManager {
         }
     }
 
-    boolean addUserToSRTracking(String discordUsername, String discordID, String battletag, String sr) {
+    boolean addSRTracking(String discordUsername, String discordID, String battletag, String sr) {
         if (getUserSRByDiscordID(discordID) == null) {
-            final String writeRange = "SRTracking!A2:D";
             List<List<Object>> newValues = new ArrayList<>();
             List<Object> tempList = new ArrayList<>();
             tempList.add(discordUsername);
@@ -153,7 +150,7 @@ class GS_SRManager {
             String valueInputOption = "RAW"; //RAW or USER_ENTERED
             AppendValuesResponse result;
             try {
-                result = service.spreadsheets().values().append(spreadsheetId, writeRange, body)
+                result = service.spreadsheets().values().append(spreadsheetId, sheetRange, body)
                         .setValueInputOption(valueInputOption)
                         .execute();
                 System.out.printf("%d cells updated.\n", result.getUpdates().getUpdatedCells());
@@ -166,6 +163,70 @@ class GS_SRManager {
         } else {
             System.out.printf("There is already a record for this user [%s]\n", discordUsername);
             return false;
+        }
+    }
+
+    String getUserBattletagByDiscordID(String lookUpID) {
+        ValueRange response;
+        List<List<Object>> values = null;
+        try {
+            response = service.spreadsheets().values()
+                    .get(spreadsheetId, sheetRange)
+                    .execute();
+            values = response.getValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
+        }
+        if (values == null || values.isEmpty()) {
+            System.out.println("No data found.");
+            return null;
+        } else {
+            String storedBattletag = "";
+            for (List<Object> row : values) {
+                if (row.get(1).equals(lookUpID)) {
+                    storedBattletag = row.get(2).toString();
+                }
+            }
+            if (storedBattletag.equals("")) {
+                System.out.printf("There is currently no record for user [%s]\n", lookUpID);
+                return null;
+            } else {
+                System.out.printf("The stored Battletag for user [%s] is [%s]\n", lookUpID, storedBattletag);
+                return storedBattletag;
+            }
+        }
+    }
+
+    String getUserDiscordIDByBattletag(String lookUpID) {
+        ValueRange response;
+        List<List<Object>> values = null;
+        try {
+            response = service.spreadsheets().values()
+                    .get(spreadsheetId, sheetRange)
+                    .execute();
+            values = response.getValues();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
+        }
+        if (values == null || values.isEmpty()) {
+            System.out.println("No data found.");
+            return null;
+        } else {
+            String storedDiscordID = "";
+            for (List<Object> row : values) {
+                if (row.get(2).equals(lookUpID)) {
+                    storedDiscordID = row.get(1).toString();
+                }
+            }
+            if (storedDiscordID.equals("")) {
+                System.out.printf("There is currently no record for user [%s]\n", lookUpID);
+                return null;
+            } else {
+                System.out.printf("The stored Discord ID for user [%s] is [%s]\n", lookUpID, storedDiscordID);
+                return storedDiscordID;
+            }
         }
     }
 

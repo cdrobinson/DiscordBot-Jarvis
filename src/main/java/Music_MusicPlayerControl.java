@@ -23,12 +23,12 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
 
-public class MusicPlayerControl extends ListenerAdapter {
+public class Music_MusicPlayerControl extends ListenerAdapter {
     private static final int DEFAULT_VOLUME = 10; //(0 - 150, where 100 is default max volume)
     private final AudioPlayerManager playerManager;
-    private final Map<String, GuildMusicManager> musicManagers;
+    private final Map<String, Music_GuildMusicManager> musicManagers;
 
-    MusicPlayerControl() {
+    Music_MusicPlayerControl() {
         java.util.logging.Logger.getLogger("org.apache.http.client.protocol.ResponseProcessCookies").setLevel(Level.OFF);
         this.playerManager = new DefaultAudioPlayerManager();
         playerManager.registerSourceManager(new YoutubeAudioSourceManager());
@@ -69,9 +69,9 @@ public class MusicPlayerControl extends ListenerAdapter {
             return;
 
         Guild guild = event.getGuild();
-        GuildMusicManager guildMusicManager = getMusicManager(guild);
+        Music_GuildMusicManager guildMusicManager = getMusicManager(guild);
         AudioPlayer player = guildMusicManager.player;
-        TrackScheduler scheduler = guildMusicManager.scheduler;
+        Music_TrackScheduler scheduler = guildMusicManager.scheduler;
 
         if (".play".equals(command[0])) {
             if (command.length == 1) //It is only the command to start playback (probably after pause)
@@ -204,7 +204,7 @@ public class MusicPlayerControl extends ListenerAdapter {
         }
     }
 
-    private void loadAndPlay(GuildMusicManager guildMusicManager, final MessageChannel channel, String url, final boolean addPlaylist) {
+    private void loadAndPlay(Music_GuildMusicManager guildMusicManager, final MessageChannel channel, String url, final boolean addPlaylist) {
         final String trackUrl;
 
         //Strip <>'s that prevent discord from embedding link resources
@@ -255,14 +255,14 @@ public class MusicPlayerControl extends ListenerAdapter {
         });
     }
 
-    private GuildMusicManager getMusicManager(Guild guild) {
+    private Music_GuildMusicManager getMusicManager(Guild guild) {
         String guildId = guild.getId();
-        GuildMusicManager mng = musicManagers.get(guildId);
+        Music_GuildMusicManager mng = musicManagers.get(guildId);
         if (mng == null) {
             synchronized (musicManagers) {
                 mng = musicManagers.get(guildId);
                 if (mng == null) {
-                    mng = new GuildMusicManager(playerManager);
+                    mng = new Music_GuildMusicManager(playerManager);
                     mng.player.setVolume(DEFAULT_VOLUME);
                     musicManagers.put(guildId, mng);
                 }

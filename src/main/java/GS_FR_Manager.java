@@ -8,14 +8,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class GS_FeatureRequestManager {
+class GS_FR_Manager {
 
     private static Sheets service;
     private static String spreadsheetId;
     private static final String featuresRange = "FeatureRequests!A2:D";
     private static final String detailsRange = "FeatureRequests!E1:H1";
 
-    GS_FeatureRequestManager(){
+    GS_FR_Manager(){
         GS_Manager gsManager = new GS_Manager();
         service = gsManager.getSheet();
         spreadsheetId = gsManager.getSpreadsheetId();

@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-public class TwitterManager implements Runnable {
+public class Twitter_Manager implements Runnable {
 
     private Client twitterClient;
     private BlockingQueue<String> msgQueue;
     private TextChannel outputChannel;
 
-    TwitterManager(TextChannel outputChannel) {
+    Twitter_Manager(TextChannel outputChannel) {
         ConfigManager cm = new ConfigManager();
         this.outputChannel = outputChannel;
         /* Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */
@@ -68,6 +68,7 @@ public class TwitterManager implements Runnable {
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                System.exit(0);
             }
         }
     }
