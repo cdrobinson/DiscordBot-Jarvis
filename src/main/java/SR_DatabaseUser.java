@@ -1,24 +1,24 @@
 class SR_DatabaseUser {
 
-    private String DiscordID;
-    private String Battletag;
-    private Integer SR;
+    private String discordID;
+    private String battletag;
+    private Integer userSR;
 
     String getDiscordID() {
-        return DiscordID;
+        return discordID;
     }
 
     String getBattletag() {
-        return Battletag;
+        return battletag;
     }
 
-    Integer getSR() {
-        return SR;
+    Integer getUserSR() {
+        return userSR;
     }
 
-    SR_DatabaseUser(String discordID, String battletag, Integer SR) {
-        DiscordID = discordID;
-        Battletag = battletag;
-        this.SR = SR;
+    SR_DatabaseUser(String discordID, String battletag, Integer userSR) {
+        this.discordID = discordID;
+        this.battletag = battletag;
+        this.userSR = userSR;
     }
 }

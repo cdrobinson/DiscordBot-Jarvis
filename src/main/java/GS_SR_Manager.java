@@ -19,7 +19,6 @@ class GS_SR_Manager {
         spreadsheetId = GSManager.getSpreadsheetId();
     }
 
-    //TODO: Optimize searching using more of the SR_DatabaseUser class
     List<SR_DatabaseUser> getFullDatabase(){
         ValueRange response;
         List<List<Object>> values = null;
@@ -38,6 +37,7 @@ class GS_SR_Manager {
         } else {
             List<SR_DatabaseUser> databaseValues = new ArrayList<>();
             for (List<Object> row : values) {
+                //0: Discord Name, 1: Discord ID, 2: Battletag, 3: SR
                 SR_DatabaseUser srDatabaseUser = new SR_DatabaseUser(
                         row.get(1).toString(),
                         row.get(2).toString(),
@@ -104,36 +104,34 @@ class GS_SR_Manager {
         }
     }
 
-    String getUserSRByDiscordID(String userDiscordID) {
-        ValueRange response;
-        List<List<Object>> values = null;
-        try {
-            response = service.spreadsheets().values()
-                    .get(spreadsheetId, sheetRange)
-                    .execute();
-            values = response.getValues();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
-        }
-        if (values == null || values.isEmpty()) {
-            System.out.println("No data found.");
-            return null;
-        } else {
-            String storedSR = "";
-            for (List<Object> row : values) {
-                if (row.get(1).equals(userDiscordID)) {
-                    storedSR = row.get(3).toString();
-                }
-            }
-            if (storedSR.equals("")) {
-                System.out.printf("There is currently no record stored for user [%s]\n", userDiscordID);
-                return null;
-            } else {
-                System.out.printf("The stored SR for user [%s] is [%s]\n", userDiscordID, storedSR);
-                return storedSR;
+    Integer getUserSRByDiscordID(String userDiscordID) {
+        List<SR_DatabaseUser> databaseList = getFullDatabase();
+        for (SR_DatabaseUser user: databaseList) {
+            if (user.getDiscordID().equals(userDiscordID)) {
+                return user.getUserSR();
             }
         }
+        return null;
+    }
+
+    String getUserBattletagByDiscordID(String lookUpDiscordId) {
+        List<SR_DatabaseUser> databaseList = getFullDatabase();
+        for (SR_DatabaseUser user: databaseList) {
+            if (user.getDiscordID().equals(lookUpDiscordId)) {
+                return user.getBattletag();
+            }
+        }
+        return null;
+    }
+
+    String getUserDiscordIDByBattletag(String lookUpBattletag) {
+        List<SR_DatabaseUser> databaseList = getFullDatabase();
+        for (SR_DatabaseUser user: databaseList) {
+            if (user.getBattletag().equals(lookUpBattletag)) {
+                return user.getDiscordID();
+            }
+        }
+        return null;
     }
 
     boolean addSRTracking(String discordUsername, String discordID, String battletag, String sr) {
@@ -165,69 +163,4 @@ class GS_SR_Manager {
             return false;
         }
     }
-
-    String getUserBattletagByDiscordID(String lookUpID) {
-        ValueRange response;
-        List<List<Object>> values = null;
-        try {
-            response = service.spreadsheets().values()
-                    .get(spreadsheetId, sheetRange)
-                    .execute();
-            values = response.getValues();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
-        }
-        if (values == null || values.isEmpty()) {
-            System.out.println("No data found.");
-            return null;
-        } else {
-            String storedBattletag = "";
-            for (List<Object> row : values) {
-                if (row.get(1).equals(lookUpID)) {
-                    storedBattletag = row.get(2).toString();
-                }
-            }
-            if (storedBattletag.equals("")) {
-                System.out.printf("There is currently no record for user [%s]\n", lookUpID);
-                return null;
-            } else {
-                System.out.printf("The stored Battletag for user [%s] is [%s]\n", lookUpID, storedBattletag);
-                return storedBattletag;
-            }
-        }
-    }
-
-    String getUserDiscordIDByBattletag(String lookUpID) {
-        ValueRange response;
-        List<List<Object>> values = null;
-        try {
-            response = service.spreadsheets().values()
-                    .get(spreadsheetId, sheetRange)
-                    .execute();
-            values = response.getValues();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
-        }
-        if (values == null || values.isEmpty()) {
-            System.out.println("No data found.");
-            return null;
-        } else {
-            String storedDiscordID = "";
-            for (List<Object> row : values) {
-                if (row.get(2).equals(lookUpID)) {
-                    storedDiscordID = row.get(1).toString();
-                }
-            }
-            if (storedDiscordID.equals("")) {
-                System.out.printf("There is currently no record for user [%s]\n", lookUpID);
-                return null;
-            } else {
-                System.out.printf("The stored Discord ID for user [%s] is [%s]\n", lookUpID, storedDiscordID);
-                return storedDiscordID;
-            }
-        }
-    }
-
 }

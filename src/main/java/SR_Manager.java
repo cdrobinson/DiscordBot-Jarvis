@@ -98,7 +98,7 @@ class SR_Manager implements Runnable {
     private void getLeaderboard(){
         GS_SR_Manager GSManager = new GS_SR_Manager();
         List<SR_DatabaseUser> databaseData = GSManager.getFullDatabase();
-        Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getSR);
+        Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getUserSR);
         databaseData.sort(databaseComparator);
         Collections.reverse(databaseData);
         StringBuilder leaderboardString = new StringBuilder();
@@ -106,7 +106,7 @@ class SR_Manager implements Runnable {
         for (SR_DatabaseUser user : databaseData) {
             String username = event.getGuild().getMemberById(user.getDiscordID()).getEffectiveName();
             String battletag = user.getBattletag();
-            String userSr = user.getSR().toString();
+            String userSr = user.getUserSR().toString();
             leaderboardString
                     .append(username)
                     .append("** | **")
@@ -143,7 +143,7 @@ class SR_Manager implements Runnable {
             } else {
                 lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
             }
-            String lookUpSR;
+            Integer lookUpSR;
             GS_SR_Manager GSManager = new GS_SR_Manager();
             lookUpSR = GSManager.getUserSRByDiscordID(lookUpID);
             if (lookUpSR ==  null) {
@@ -153,7 +153,7 @@ class SR_Manager implements Runnable {
             String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
             channel.sendMessageFormat("%s's stored SR is currently %s", lookUpName, lookUpSR).queue();
         } else {
-            String authorSR;
+            Integer authorSR;
             GS_SR_Manager GSManager = new GS_SR_Manager();
             authorSR = GSManager.getUserSRByDiscordID(authorID);
             if (authorSR != null) {

@@ -36,7 +36,7 @@ public class MainListener extends ListenerAdapter {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
-        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
+        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName")) || channel.getName().equals("bot_stuff")) {
             Thread srTrackerThread = new Thread(new SR_Manager(event));
             srTrackerThread.start();
         }
