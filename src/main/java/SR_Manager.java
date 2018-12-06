@@ -196,7 +196,7 @@ class SR_Manager implements Runnable {
 
     private String addToFile(String userDiscordName, String userID, String battletag, String userSR) {
         GS_SR_Manager GSManager = new GS_SR_Manager();
-        boolean added = GSManager.addSRTracking(userDiscordName, userID, battletag, userSR);
+        boolean added = GSManager.addUserToDatabase(userDiscordName, userID, battletag, userSR);
         if (added) {
             System.out.printf("%s has registered %s as their Battletag with an SR of %s", userID, battletag, userSR);
             return "added to file";

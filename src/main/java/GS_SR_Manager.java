@@ -19,7 +19,7 @@ class GS_SR_Manager {
         spreadsheetId = GSManager.getSpreadsheetId();
     }
 
-    List<SR_DatabaseUser> getFullDatabase(){
+    private List<List<Object>> getDatabaseValues() {
         ValueRange response;
         List<List<Object>> values = null;
         try {
@@ -31,6 +31,16 @@ class GS_SR_Manager {
             e.printStackTrace();
             System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
         }
+        if (values == null || values.isEmpty()) {
+            System.out.println("No data found.");
+            return null;
+        } else {
+            return values;
+        }
+    }
+
+    List<SR_DatabaseUser> getFullDatabase(){
+        List<List<Object>> values = getDatabaseValues();
         if (values == null || values.isEmpty()) {
             System.out.println("No data found.");
             return null;
@@ -49,17 +59,7 @@ class GS_SR_Manager {
         }
     }
     void updateUserSRByBattletag(String userBattletag, String newSR) {
-        ValueRange response;
-        List<List<Object>> values = null;
-        try {
-            response = service.spreadsheets().values()
-                    .get(spreadsheetId, sheetRange)
-                    .execute();
-            values = response.getValues();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("There was an error getting values from the spreadsheet while looking up by Battletag");
-        }
+        List<List<Object>> values = getDatabaseValues();
         if (values == null || values.isEmpty()) {
             System.out.println("No data found.");
         } else {
@@ -81,17 +81,7 @@ class GS_SR_Manager {
     }
 
     List<String> getAllBattletags(){
-        ValueRange response;
-        List<List<Object>> values = null;
-        try {
-            response = service.spreadsheets().values()
-                    .get(spreadsheetId, sheetRange)
-                    .execute();
-            values = response.getValues();
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("There was an error getting values from the spreadsheet while looking up by Discord ID");
-        }
+        List<List<Object>> values = getDatabaseValues();
         if (values == null || values.isEmpty()) {
             System.out.println("No data found.");
             return null;
@@ -134,7 +124,7 @@ class GS_SR_Manager {
         return null;
     }
 
-    boolean addSRTracking(String discordUsername, String discordID, String battletag, String sr) {
+    boolean addUserToDatabase(String discordUsername, String discordID, String battletag, String sr) {
         if (getUserSRByDiscordID(discordID) == null) {
             List<List<Object>> newValues = new ArrayList<>();
             List<Object> tempList = new ArrayList<>();
