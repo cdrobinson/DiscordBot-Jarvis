@@ -98,7 +98,7 @@ class GS_SR_Manager {
         List<SR_DatabaseUser> databaseList = getFullDatabase();
         for (SR_DatabaseUser user: databaseList) {
             if (user.getDiscordID().equals(userDiscordID)) {
-                return user.getUserSR();
+                return user.getSR();
             }
         }
         return null;
@@ -123,6 +123,8 @@ class GS_SR_Manager {
         }
         return null;
     }
+
+
 
     boolean addUserToDatabase(String discordUsername, String discordID, String battletag, String sr) {
         if (getUserSRByDiscordID(discordID) == null) {

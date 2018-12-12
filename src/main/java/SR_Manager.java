@@ -24,21 +24,27 @@ class SR_Manager implements Runnable {
     private void parseCommand(String[] contentString) {
         switch (contentString[0].toLowerCase()) {
             case "!updatesr":
+                event.getChannel().sendTyping().queue();
                 updateSRDatabase();
                 break;
             case "!registerbattletag":
+                event.getChannel().sendTyping().queue();
                 registerBattletag(contentString);
                 break;
             case "!sr":
+                event.getChannel().sendTyping().queue();
                 checkSR(contentString);
                 break;
             case "!leaderboard":
+                event.getChannel().sendTyping().queue();
                 getLeaderboard();
                 break;
             case "!getbattletag":
+                event.getChannel().sendTyping().queue();
                 postBattletagFromDiscordID(contentString);
                 break;
             case "!getdiscord":
+                event.getChannel().sendTyping().queue();
                 postDiscordNameFromBattletag(contentString);
                 break;
             default:
@@ -46,19 +52,45 @@ class SR_Manager implements Runnable {
         }
     }
 
-    private void postDiscordNameFromBattletag(String[] contentString) {
+    private void registerBattletag(String[] contentString){
         MessageChannel channel = event.getChannel();
-        if (contentString.length > 1) {
-            GS_SR_Manager gs_sr_manager = new GS_SR_Manager();
-            String lookupDiscordID = gs_sr_manager.getUserDiscordIDByBattletag(contentString[1]);
-            if (lookupDiscordID ==  null) {
-                channel.sendMessageFormat("%s's SR is not on file.").queue();
-                return;
+        if (contentString.length == 1) {
+            channel.sendMessage("Please enter a battletag after the command `.registerBattletag [battletag]`").queue();
+            return;
+        }
+        channel.sendMessage("Registering....").queue();
+        channel.sendTyping().queue();
+        SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(contentString[1]);
+        String userSR = overwatchProfile.getSR();
+        event.getChannel().sendTyping().queue();
+        try {
+            switch (userSR) {
+                case "This player has not placed yet":
+                    userSR = "Not Placed";
+                    break;
+                case "This player's profile is private":
+                    channel.sendMessageFormat("I'll register your battletag, but please make sure to set your profile to public").queue();
+                    userSR = "Private";
+                    break;
+                default:
+                    Integer.valueOf(userSR);
+                    break;
             }
-            String lookUpName = event.getGuild().getMemberById(lookupDiscordID).getEffectiveName();
-            channel.sendMessageFormat("%s's stored Discord name is %s", contentString[1], lookUpName).queue();
-        } else {
-            channel.sendMessage("Make sure you enter a Battletag after the command").queue();
+            String response = addToFile(event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator(),
+                    event.getAuthor().getId(), contentString[1], userSR);
+            switch (response) {
+                case "added to file":
+                    channel.sendMessageFormat("You have registered %s as your battletag with a current SR of %s", contentString[1], userSR).queue();
+                    break;
+                case "already on file":
+                    channel.sendMessageFormat("You have already registered %s as your battletag", getBattletagFromDiscordID(event.getAuthor().getId())).queue();
+                    break;
+                default:
+                    channel.sendMessage("There was an error saving your registration to file. Please try again. If the problem persists, contact an admin so we can resolve the issue").queue();
+                    break;
+            }
+        } catch (NumberFormatException e) {
+            channel.sendMessageFormat("An error occured while looking up your SR: `%s`", userSR).queue();
         }
     }
 
@@ -84,39 +116,33 @@ class SR_Manager implements Runnable {
             String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
             channel.sendMessageFormat("%s's stored battletag is %s", lookUpName, lookupBattletag).queue();
         } else {
+            event.getChannel().sendTyping().queue();
             String authorBattletag;
             GS_SR_Manager GSManager = new GS_SR_Manager();
             authorBattletag = GSManager.getUserBattletagByDiscordID(authorID);
             if (authorBattletag != null) {
                 channel.sendMessage("Your stored battletag is currently: " + authorBattletag).queue();
             } else {
-                channel.sendMessage("Your battletag is not currently on file. Run ``!registerBattletag [battletag]`` to register it.").queue();
+                channel.sendMessage("Your battletag is not currently on file. Run ``.registerBattletag [battletag]`` to register it.").queue();
             }
         }
     }
 
-    private void getLeaderboard(){
-        GS_SR_Manager GSManager = new GS_SR_Manager();
-        List<SR_DatabaseUser> databaseData = GSManager.getFullDatabase();
-        Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getUserSR);
-        databaseData.sort(databaseComparator);
-        Collections.reverse(databaseData);
-        StringBuilder leaderboardString = new StringBuilder();
-        leaderboardString.append("**=====================**\n");
-        for (SR_DatabaseUser user : databaseData) {
-            String username = event.getGuild().getMemberById(user.getDiscordID()).getEffectiveName();
-            String battletag = user.getBattletag();
-            String userSr = user.getUserSR().toString();
-            leaderboardString
-                    .append(username)
-                    .append("** | **")
-                    .append(userSr)
-                    .append("** | **")
-                    .append(battletag)
-                    .append("\n");
+    private void postDiscordNameFromBattletag(String[] contentString) {
+        MessageChannel channel = event.getChannel();
+        if (contentString.length > 1) {
+            GS_SR_Manager GSManager = new GS_SR_Manager();
+            String lookupDiscordID = GSManager.getUserDiscordIDByBattletag(contentString[1]);
+            if (lookupDiscordID ==  null) {
+                channel.sendMessageFormat("%s's SR is not on file.").queue();
+                return;
+            }
+            event.getChannel().sendTyping().queue();
+            String lookUpName = event.getGuild().getMemberById(lookupDiscordID).getEffectiveName();
+            channel.sendMessageFormat("%s's stored Discord name is %s", contentString[1], lookUpName).queue();
+        } else {
+            channel.sendMessage("Make sure you enter a Battletag after the command").queue();
         }
-        leaderboardString.append("**=====================**");
-        event.getChannel().sendMessage(leaderboardString.toString()).queue();
     }
 
     private void updateSRDatabase() {
@@ -124,9 +150,18 @@ class SR_Manager implements Runnable {
         GS_SR_Manager GSManager = new GS_SR_Manager();
         List<String> allBattletags = GSManager.getAllBattletags();
         for (String battletag : allBattletags) {
+            event.getChannel().sendTyping().queue();
             SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(battletag);
-            System.out.println(overwatchProfile.getSR());
-            GSManager.updateUserSRByBattletag(battletag, overwatchProfile.getSR());
+            String userSR = overwatchProfile.getSR();
+            switch (userSR) {
+                case "This player has not placed yet":
+                    userSR = "Not Placed";
+                    break;
+                case "This player's profile is private":
+                    userSR = "Private";
+                    break;
+            }
+            GSManager.updateUserSRByBattletag(battletag, userSR);
         }
         channel.sendMessage("All of the battletags have been updated").queue();
     }
@@ -146,6 +181,7 @@ class SR_Manager implements Runnable {
             Integer lookUpSR;
             GS_SR_Manager GSManager = new GS_SR_Manager();
             lookUpSR = GSManager.getUserSRByDiscordID(lookUpID);
+            event.getChannel().sendTyping().queue();
             if (lookUpSR ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
                 return;
@@ -156,42 +192,38 @@ class SR_Manager implements Runnable {
             Integer authorSR;
             GS_SR_Manager GSManager = new GS_SR_Manager();
             authorSR = GSManager.getUserSRByDiscordID(authorID);
+            event.getChannel().sendTyping().queue();
             if (authorSR != null) {
                 channel.sendMessage("Your stored SR is currently: " + authorSR).queue();
             } else {
-                channel.sendMessage("Your SR is not currently on file. Run ``!registerBattletag [battletag]`` to register it.").queue();
+                channel.sendMessage("Your SR is not currently on file. Run ``.registerBattletag [battletag]`` to register it.").queue();
             }
         }
     }
 
-    private void registerBattletag(String[] contentString){
-        MessageChannel channel = event.getChannel();
-        if (contentString.length == 1) {
-            channel.sendMessage("Please enter a battletag after the command ``!registerBattletag [battletag]``").queue();
-            return;
+    private void getLeaderboard(){
+        GS_SR_Manager GSManager = new GS_SR_Manager();
+        List<SR_DatabaseUser> databaseData = GSManager.getFullDatabase();
+        Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getSR);
+        databaseData.sort(databaseComparator);
+        Collections.reverse(databaseData);
+        StringBuilder leaderboardString = new StringBuilder();
+        leaderboardString.append("**=====================**\n");
+        for (SR_DatabaseUser user : databaseData) {
+            event.getChannel().sendTyping().queue();
+            String username = event.getGuild().getMemberById(user.getDiscordID()).getEffectiveName();
+            String battletag = user.getBattletag();
+            String userSr = user.getSR().toString();
+            leaderboardString
+                    .append(username)
+                    .append("** | **")
+                    .append(userSr)
+                    .append("** | **")
+                    .append(battletag)
+                    .append("\n");
         }
-        channel.sendMessage("Registering....").queue();
-        channel.sendTyping().queue();
-        SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(contentString[1]);
-        String userSR = overwatchProfile.getSR();
-        try {
-            Integer.valueOf(userSR);
-            String response = addToFile(event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator(),
-                    event.getAuthor().getId(), contentString[1], userSR);
-            switch (response) {
-                case "added to file":
-                    channel.sendMessageFormat("You have registered %s as your battletag with a current SR of %s", contentString[1], userSR).queue();
-                    break;
-                case "already on file":
-                    channel.sendMessageFormat("You have already registered %s as your battletag", contentString[1]).queue();
-                    break;
-                default:
-                    channel.sendMessage("There was an error saving your registration to file. Please try again. If the problem persists, contact an admin so we can resolve the issue").queue();
-                    break;
-            }
-        } catch (NumberFormatException e) {
-            channel.sendMessageFormat("An error occured while looking up your SR: ```%s```", userSR).queue();
-        }
+        leaderboardString.append("**=====================**");
+        event.getChannel().sendMessage(leaderboardString.toString()).queue();
     }
 
     private String addToFile(String userDiscordName, String userID, String battletag, String userSR) {
@@ -203,5 +235,10 @@ class SR_Manager implements Runnable {
         } else {
             return "already on file";
         }
+    }
+
+    private String getBattletagFromDiscordID(String discordID) {
+        GS_SR_Manager GSManager = new GS_SR_Manager();
+        return GSManager.getUserBattletagByDiscordID(discordID);
     }
 }
