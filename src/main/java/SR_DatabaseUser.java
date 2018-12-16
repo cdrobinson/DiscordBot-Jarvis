@@ -4,6 +4,26 @@ class SR_DatabaseUser {
     private String DiscordID;
     private String Battletag;
     private Integer SR;
+    private String ProfileURL;
+    private String IconURL;
+    private String RankIconURL;
+
+    SR_DatabaseUser(String discordName, String discordID, String battletag, Integer SR) {
+        this.DiscordID = discordID;
+        this.Battletag = battletag;
+        this.SR = SR;
+        this.DiscordName = discordName;
+    }
+
+    SR_DatabaseUser(String discordName, String discordID, String battletag, Integer SR, String profileURL, String iconURL, String rankIconURL) {
+        this.DiscordID = discordID;
+        this.Battletag = battletag;
+        this.SR = SR;
+        this.DiscordName = discordName;
+        this.ProfileURL = profileURL;
+        this.IconURL = iconURL;
+        this.RankIconURL = rankIconURL;
+    }
 
     String getDiscordID() {
         return DiscordID;
@@ -21,10 +41,15 @@ class SR_DatabaseUser {
         return DiscordName;
     }
 
-    SR_DatabaseUser(String discordName, String discordID, String battletag, Integer SR) {
-        this.DiscordID = discordID;
-        this.Battletag = battletag;
-        this.SR = SR;
-        this.DiscordName = discordName;
+    String getProfileURL() {
+        return ProfileURL;
+    }
+
+    String getIconURL() {
+        return IconURL;
+    }
+
+    String getRankIconURL() {
+        return RankIconURL;
     }
 }

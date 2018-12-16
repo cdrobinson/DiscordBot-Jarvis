@@ -1,3 +1,4 @@
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -6,6 +7,7 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.awt.*;
 import java.io.File;
 import java.util.List;
 
@@ -101,15 +103,17 @@ class CommandParser {
                 channel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
                 break;
             case "!test":
-                channel.sendMessage("```diff\n" +
-                        "* 0 | Approved | SolarOracle | make Jarvis notice when someone starts playing a game and tells them to have fun playing that game\n" +
-                        "+ 1 | Finished | BattlemanMK2 | Have Jarvis put everything on Google Sheets instead of text files\n" +
-                        "* 2 | Approved | BattlemanMK2 | Allow Jarvis to manage roles based off of reactions\n" +
-                        "- 3 | Denied | SolarOracle | Ban Voltage\n" +
-                        "+ 4 | Finished | BattlemanMK2 | add a \"finished\" tag for features\n" +
-                        "| 5 | Approved | BattlemanMK2 | allow people to register multiple battletags and allow members to look up battletags based on discord mentions and vise versa\n" +
-                        "* 6 | Approved | BattlemanMK2 | auto update Overwatch SR\n" +
-                        "```").queue();
+                SR_OverwatchProfile privateProfile = new SR_OverwatchProfile("Manofvault#1415");
+                SR_OverwatchProfile notPlaced = new SR_OverwatchProfile("Solitary#11979");
+                /*EmbedBuilder embedBuilder = new EmbedBuilder();
+                embedBuilder.setColor(Color.YELLOW);
+                embedBuilder.setAuthor("BattlemanMK2", "https://playoverwatch.com/en-us/career/pc/Battlemanmk2-1251");
+                //embedBuilder.setTitle("Overwatch Profile Report", "https://playoverwatch.com/en-us/career/pc/Battlemanmk2-1251");
+                //embedBuilder.setDescription("Here is a breakdown of BattlemanMK2's SR");
+                embedBuilder.setThumbnail("https://d15f34w2p8l1cc.cloudfront.net/overwatch/155a82e7279318dc60344907aed290f2ea4c4387e73285659969668939979cfa.png");
+                embedBuilder.addField("SR", "3000", false);
+                embedBuilder.setFooter("Battlemanmk2#1251", "https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-PlatinumTier.png");
+                channel.sendMessage(embedBuilder.build()).queue();*/
                 break;
             default:
                     break;

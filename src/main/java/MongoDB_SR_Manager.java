@@ -23,12 +23,16 @@ class MongoDB_SR_Manager {
         this.collection = mongoDB_manager.getCollection();
     }
 
-    Boolean addUserToDatabase(String discordName, String discordID, String battletag, Integer sr) {
+    Boolean addUserToDatabase(String discordName, String discordID, String battletag, Integer sr,
+                              String profileURL, String portraitURL, String rankIconURL) {
         Document userInformation = new Document();
         userInformation.append("Discord Name", discordName);
         userInformation.append("Discord ID", discordID);
         userInformation.append("Battletag", battletag);
         userInformation.append("SR", sr);
+        userInformation.append("Profile URL", profileURL);
+        userInformation.append("Portrait URL", portraitURL);
+        userInformation.append("Rank Icon URL", rankIconURL);
 
         if (collection.find(eq("Discord ID", discordID)).first() == null) {
             collection.insertOne(userInformation);
@@ -39,12 +43,16 @@ class MongoDB_SR_Manager {
         }
     }
 
-    Boolean updateUsersSRByBattletag(String battletag, String userSR) {
+    Boolean updateUserByBattletag(String battletag, String userSR, String profileURL, String portraitURL, String rankIconURL) {
         try {
             Integer userSRInt = Integer.parseInt(userSR);
-            return collection.updateOne(eq("Battletag", battletag), combine(set("SR", userSRInt), currentDate("lastUpdated"))).wasAcknowledged();
+            return collection.updateOne(eq("Battletag", battletag),
+                    combine(set("SR", userSRInt), currentDate("lastUpdated"), set("Profile URL", profileURL),
+                            set("Portrait URL", portraitURL), set("Rank Icon URL", rankIconURL))).wasAcknowledged();
         } catch (NumberFormatException e) {
-            return collection.updateOne(eq("Battletag", battletag), combine(set("SR", userSR), currentDate("lastUpdated"))).wasAcknowledged();
+            return collection.updateOne(eq("Battletag", battletag),
+                    combine(set("SR", userSR), currentDate("lastUpdated"), set("Profile URL", profileURL),
+                            set("Portrait URL", portraitURL), set("Rank Icon URL", rankIconURL))).wasAcknowledged();
         }
     }
 
@@ -70,6 +78,22 @@ class MongoDB_SR_Manager {
     Integer getUserSrByDiscordId(String discordId) {
         FindIterable<Document> foundSet = collection.find(eq("Discord ID", discordId)).projection(include("SR"));
         return Objects.requireNonNull(foundSet.first()).getInteger("SR");
+    }
+
+    SR_DatabaseUser getUserDataByDiscordId(String discordId) {
+        FindIterable<Document> foundSet = collection.find(eq("Discord ID", discordId));
+        Document document = foundSet.first();
+        if (document != null) {
+            return new SR_DatabaseUser(
+                    document.getString("Discord Name"),
+                    document.getString("Discord ID"),
+                    document.getString("Battletag"),
+                    document.getInteger("SR"),
+                    document.getString("Profile URL"),
+                    document.getString("Portrait URL"),
+                    document.getString("Rank Icon URL"));
+        }
+        return null;
     }
 
     List<SR_DatabaseUser> getFullDatabase() {
