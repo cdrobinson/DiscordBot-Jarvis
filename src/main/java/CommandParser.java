@@ -1,4 +1,3 @@
-import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -7,7 +6,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
-import java.awt.*;
 import java.io.File;
 import java.util.List;
 
@@ -103,8 +101,8 @@ class CommandParser {
                 channel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
                 break;
             case "!test":
-                SR_OverwatchProfile privateProfile = new SR_OverwatchProfile("Manofvault#1415");
-                SR_OverwatchProfile notPlaced = new SR_OverwatchProfile("Solitary#11979");
+                new SR_OverwatchProfile("Manofvault#1415");
+                new SR_OverwatchProfile("Solitary#11979");
                 /*EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setColor(Color.YELLOW);
                 embedBuilder.setAuthor("BattlemanMK2", "https://playoverwatch.com/en-us/career/pc/Battlemanmk2-1251");
