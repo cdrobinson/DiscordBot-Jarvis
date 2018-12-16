@@ -4,7 +4,7 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent;
+import net.dv8tion.jda.core.events.user.update.UserUpdateGameEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class MainListener extends ListenerAdapter {
             System.out.printf("[%s][%s] %#s: %s%n", event.getGuild().getName(),
                     channel.getName(), event.getAuthor(), message.getContentRaw());
         }
-        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName"))) {
+        if (channel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName")) || channel.getName().equals("bot_stuff")) {
             Thread srTrackerThread = new Thread(new SR_Manager(event));
             srTrackerThread.start();
         }
@@ -52,8 +52,8 @@ public class MainListener extends ListenerAdapter {
 
 
     @Override
-    public void onGenericMessageReaction(GenericMessageReactionEvent event) {
-
+    public void onUserUpdateGame(UserUpdateGameEvent event) {
+        //System.out.printf("[%s][%s] switched from %s to %s%n", event.getGuild().getName(), event.getMember().getEffectiveName(), event.getOldGame(), event.getNewGame());
     }
 
     @Override
