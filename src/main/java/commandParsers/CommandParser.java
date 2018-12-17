@@ -1,3 +1,12 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package commandParsers;
+
+import bot.utilities.UserInputManager;
+import bot.utilities.Util_FileManager;
+import bot.utilities.Util_HelpMessageBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.MessageBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -5,17 +14,18 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import srTracking.OverwatchProfile;
 
 import java.io.File;
 import java.util.List;
 
-class CommandParser {
+public class CommandParser {
 
 
-    CommandParser() {
+    public CommandParser() {
     }
 
-    void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event) {
+    public void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event) {
         String lcContent = contentString.toLowerCase();
         Util_FileManager fileManager = new Util_FileManager();
         String[] contentList = contentString.split(" ");
@@ -94,15 +104,14 @@ class CommandParser {
                 break;
             case "!vote":
                 UserInputManager.createPoll(event);
-
                 break;
             case "!feed":
                 event.getMessage().addReaction("\uD83D\uDEE2").queue();
                 channel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
                 break;
             case "!test":
-                new SR_OverwatchProfile("Manofvault#1415");
-                new SR_OverwatchProfile("Solitary#11979");
+                new OverwatchProfile("Manofvault#1415");
+                new OverwatchProfile("Solitary#11979");
                 /*EmbedBuilder embedBuilder = new EmbedBuilder();
                 embedBuilder.setColor(Color.YELLOW);
                 embedBuilder.setAuthor("BattlemanMK2", "https://playoverwatch.com/en-us/career/pc/Battlemanmk2-1251");

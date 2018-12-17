@@ -1,8 +1,14 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package bot.utilities;
+
 import java.io.File;
 
-class Util_FileManager {
+public class Util_FileManager {
 
-    File getFile(String fileName) {
+    public File getFile(String fileName) {
         try {
             String fileLocation = System.getProperty("user.dir");
             File file = new File(fileLocation + "/images/" + fileName);

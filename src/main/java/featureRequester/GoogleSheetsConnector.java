@@ -1,6 +1,13 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package featureRequester;
+
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import google.sheets.Client;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -8,20 +15,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-class GS_FR_Manager {
+class GoogleSheetsConnector {
 
     private static Sheets service;
     private static String spreadsheetId;
     private static final String featuresRange = "FeatureRequests!A2:D";
     private static final String detailsRange = "FeatureRequests!E1:H1";
 
-    GS_FR_Manager(){
-        GS_Manager gsManager = new GS_Manager();
+    GoogleSheetsConnector(){
+        Client gsManager = new Client();
         service = gsManager.getSheet();
         spreadsheetId = gsManager.getSpreadsheetId();
     }
 
-    List<FR_Request> getAllFeatureRequests(){
+    List<Request> getAllFeatureRequests(){
         ValueRange response;
         List<List<Object>> values = null;
         try {
@@ -37,9 +44,9 @@ class GS_FR_Manager {
             System.out.println("No data found.");
             return null;
         } else {
-            List<FR_Request> databaseValues = new ArrayList<>();
+            List<Request> databaseValues = new ArrayList<>();
             for (List<Object> row : values) {
-                FR_Request frRequest = new FR_Request(
+                Request frRequest = new Request(
                         row.get(0).toString(),
                         row.get(1).toString(),
                         row.get(3).toString());

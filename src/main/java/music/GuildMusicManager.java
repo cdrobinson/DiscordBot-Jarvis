@@ -1,10 +1,16 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package music;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 
 /**
  * Holder for both the player and a track scheduler for one guild.
  */
-class Music_GuildMusicManager {
+class GuildMusicManager {
     /**
      * Audio player for the guild.
      */
@@ -12,21 +18,21 @@ class Music_GuildMusicManager {
     /**
      * Track scheduler for the player.
      */
-    final Music_TrackScheduler scheduler;
+    final TrackScheduler scheduler;
     /**
      * Wrapper around AudioPlayer to use it as an AudioSendHandler.
      */
-    final Music_AudioPlayerSendHandler sendHandler;
+    final AudioPlayerSendHandler sendHandler;
 
     /**
      * Creates a player and a track scheduler.
      *
      * @param manager Audio player manager to use for creating the player.
      */
-    Music_GuildMusicManager(AudioPlayerManager manager) {
+    GuildMusicManager(AudioPlayerManager manager) {
         player = manager.createPlayer();
-        scheduler = new Music_TrackScheduler(player);
-        sendHandler = new Music_AudioPlayerSendHandler(player);
+        scheduler = new TrackScheduler(player);
+        sendHandler = new AudioPlayerSendHandler(player);
         player.addListener(scheduler);
     }
 }

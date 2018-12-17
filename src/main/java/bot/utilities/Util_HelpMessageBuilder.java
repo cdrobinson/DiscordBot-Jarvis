@@ -1,5 +1,11 @@
-class Util_HelpMessageBuilder {
-    static String getHelpMessage() {
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package bot.utilities;
+
+public class Util_HelpMessageBuilder {
+    public static String getHelpMessage() {
         return "```" +
                 "!ping: Pong! [current ping to bot in ms] \n" +
                 "!bing: Bong! \n" +

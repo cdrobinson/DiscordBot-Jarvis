@@ -1,5 +1,12 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package srTracking;
+
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
+import mongodb.Client;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -12,15 +19,15 @@ import static com.mongodb.client.model.Updates.combine;
 import static com.mongodb.client.model.Updates.currentDate;
 import static com.mongodb.client.model.Updates.set;
 
-class MongoDB_SR_Manager {
+class MongoDbConnector {
 
-    private MongoDB_Manager mongoDB_manager;
+    private Client client;
     private MongoCollection<Document> collection;
 
-    MongoDB_SR_Manager() {
-        this.mongoDB_manager = new MongoDB_Manager("mongodb+srv://Jarvis:XVM1nCrfotM7tP99@frontline-izf18.mongodb.net/test?retryWrites=true",
+    MongoDbConnector() {
+        this.client = new Client("mongodb+srv://Jarvis:XVM1nCrfotM7tP99@frontline-izf18.mongodb.net/test?retryWrites=true",
                 "Frontline", "SR");
-        this.collection = mongoDB_manager.getCollection();
+        this.collection = client.getCollection();
     }
 
     Boolean addUserToDatabase(String discordName, String discordID, String battletag, Integer sr,
@@ -80,11 +87,11 @@ class MongoDB_SR_Manager {
         return Objects.requireNonNull(foundSet.first()).getInteger("SR");
     }
 
-    SR_DatabaseUser getUserDataByDiscordId(String discordId) {
+    DatabaseUserProfile getUserDataByDiscordId(String discordId) {
         FindIterable<Document> foundSet = collection.find(eq("Discord ID", discordId));
         Document document = foundSet.first();
         if (document != null) {
-            return new SR_DatabaseUser(
+            return new DatabaseUserProfile(
                     document.getString("Discord Name"),
                     document.getString("Discord ID"),
                     document.getString("Battletag"),
@@ -96,22 +103,22 @@ class MongoDB_SR_Manager {
         return null;
     }
 
-    List<SR_DatabaseUser> getFullDatabase() {
-        ArrayList<SR_DatabaseUser> databaseData = new ArrayList<>();
+    List<DatabaseUserProfile> getFullDatabase() {
+        ArrayList<DatabaseUserProfile> databaseData = new ArrayList<>();
         FindIterable<Document> foundSet = collection.find();
         for (Document document : foundSet) {
             //String discordName, String discordID, String battletag, Integer SR
-            SR_DatabaseUser user = new SR_DatabaseUser(
+            DatabaseUserProfile databaseUserProfile = new DatabaseUserProfile(
                     document.getString("Discord Name"),
                     document.getString("Discord ID"),
                     document.getString("Battletag"),
                     document.getInteger("SR"));
-            databaseData.add(user);
+            databaseData.add(databaseUserProfile);
         }
         return databaseData;
     }
 
     void endConnection() {
-        mongoDB_manager.endConnection();
+        client.endConnection();
     }
 }

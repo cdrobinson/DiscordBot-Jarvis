@@ -1,4 +1,10 @@
-class SR_DatabaseUser {
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package srTracking;
+
+class DatabaseUserProfile {
 
     private String DiscordName;
     private String DiscordID;
@@ -8,14 +14,14 @@ class SR_DatabaseUser {
     private String IconURL;
     private String RankIconURL;
 
-    SR_DatabaseUser(String discordName, String discordID, String battletag, Integer SR) {
+    DatabaseUserProfile(String discordName, String discordID, String battletag, Integer SR) {
         this.DiscordID = discordID;
         this.Battletag = battletag;
         this.SR = SR;
         this.DiscordName = discordName;
     }
 
-    SR_DatabaseUser(String discordName, String discordID, String battletag, Integer SR, String profileURL, String iconURL, String rankIconURL) {
+    DatabaseUserProfile(String discordName, String discordID, String battletag, Integer SR, String profileURL, String iconURL, String rankIconURL) {
         this.DiscordID = discordID;
         this.Battletag = battletag;
         this.SR = SR;

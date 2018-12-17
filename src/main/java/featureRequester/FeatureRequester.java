@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package featureRequester;
+
+import bot.utilities.ConfigManager;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -5,15 +12,15 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import java.util.List;
 import java.util.Map;
 
-public class FR_FeatureRequester implements Runnable {
+public class FeatureRequester implements Runnable {
 
     private MessageReceivedEvent event;
-    private GS_FR_Manager gs_FRManager;
+    private GoogleSheetsConnector gs_FRManager;
     private static final String headerMessage = "List of requested features:\n"; //⭕=Received | ✔=Added | ❌=Denied\n```\n";
 
-    FR_FeatureRequester(MessageReceivedEvent passedEvent) {
+    public FeatureRequester(MessageReceivedEvent passedEvent) {
         this.event = passedEvent;
-        this.gs_FRManager = new GS_FR_Manager();
+        this.gs_FRManager = new GoogleSheetsConnector();
     }
 
     @Override
@@ -111,11 +118,11 @@ public class FR_FeatureRequester implements Runnable {
     }
 
     private String getFormattedFeatureList(){
-        List<FR_Request> frRequests = gs_FRManager.getAllFeatureRequests();
+        List<Request> frRequests = gs_FRManager.getAllFeatureRequests();
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append(headerMessage);
         stringBuilder.append("```diff\n");
-        for (FR_Request frRequest : frRequests) {
+        for (Request frRequest : frRequests) {
             String approvalStatus = frRequest.getApprovalStatus();
             switch (approvalStatus) {
                 case "Open":

@@ -1,11 +1,18 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package srTracking;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 
-class SR_OverwatchProfile {
+public class OverwatchProfile {
 
     private String userSR;
     private String response;
@@ -13,7 +20,7 @@ class SR_OverwatchProfile {
     private String portraitURL;
     private String rankIconURL;
 
-    SR_OverwatchProfile(String battleTag) {
+    public OverwatchProfile(String battleTag) {
         this.profileURL = "https://playoverwatch.com/en-us/career/pc/" + battleTag.replaceAll("#", "-");
         System.out.println(profileURL);
         try {
@@ -42,6 +49,9 @@ class SR_OverwatchProfile {
         } catch (IOException e) {
             e.printStackTrace();
             if (e.getCause() == new SocketTimeoutException()) {
+                this.userSR = "Error";
+            }
+            if (e.getCause() == new UnknownHostException()) {
                 this.userSR = "Error";
             }
         }
