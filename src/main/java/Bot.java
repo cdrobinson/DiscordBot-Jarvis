@@ -1,3 +1,6 @@
+import bot.utilities.ConfigManager;
+import listeners.MainListener;
+import music.MusicPlayerControl;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
@@ -11,7 +14,7 @@ public class Bot {
         ConfigManager configManager = new ConfigManager();
         JDA api = new JDABuilder(AccountType.BOT).setToken(configManager.getProperty("botToken")).build().awaitReady();
         api.addEventListener(new MainListener(api));
-        api.addEventListener(new Music_MusicPlayerControl());
+        api.addEventListener(new MusicPlayerControl());
         api.setAutoReconnect(true);
         api.getPresence().setGame(Game.playing(configManager.getProperty("defaultPlaying")));
     }

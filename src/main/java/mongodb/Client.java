@@ -1,26 +1,32 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package mongodb;
+
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-class MongoDB_Manager {
+public class Client {
 
     private MongoCollection<Document> collection;
     private MongoClient mongoClient;
 
-    MongoDB_Manager(String uriString, String databaseName, String collectionName) {
+    public Client(String uriString, String databaseName, String collectionName) {
         MongoClientURI uri = new MongoClientURI(uriString);
         this.mongoClient = new MongoClient(uri);
         MongoDatabase database = mongoClient.getDatabase(databaseName);
         this.collection = database.getCollection(collectionName);
     }
 
-    MongoCollection<Document> getCollection() {
+    public MongoCollection<Document> getCollection() {
         return collection;
     }
 
-    void endConnection() {
+    public void endConnection() {
         mongoClient.close();
     }
 }

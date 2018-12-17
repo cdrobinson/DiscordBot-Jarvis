@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package music;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -11,7 +17,7 @@ import java.util.Queue;
 /**
  * This class schedules tracks for the audio player. It contains the queue of tracks.
  */
-public class Music_TrackScheduler extends AudioEventAdapter {
+public class TrackScheduler extends AudioEventAdapter {
     private boolean repeating = false;
     private final AudioPlayer player;
     final Queue<AudioTrack> queue;
@@ -20,7 +26,7 @@ public class Music_TrackScheduler extends AudioEventAdapter {
     /**
      * @param player The audio player this scheduler uses
      */
-    Music_TrackScheduler(AudioPlayer player) {
+    TrackScheduler(AudioPlayer player) {
         this.player = player;
         this.queue = new LinkedList<>();
     }

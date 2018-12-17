@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package music;
+
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -23,12 +29,12 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.logging.Level;
 
-public class Music_MusicPlayerControl extends ListenerAdapter {
+public class MusicPlayerControl extends ListenerAdapter {
     private static final int DEFAULT_VOLUME = 10; //(0 - 150, where 100 is default max volume)
     private final AudioPlayerManager playerManager;
-    private final Map<String, Music_GuildMusicManager> musicManagers;
+    private final Map<String, GuildMusicManager> musicManagers;
 
-    Music_MusicPlayerControl() {
+    public MusicPlayerControl() {
         java.util.logging.Logger.getLogger("org.apache.http.client.protocol.ResponseProcessCookies").setLevel(Level.OFF);
         this.playerManager = new DefaultAudioPlayerManager();
         playerManager.registerSourceManager(new YoutubeAudioSourceManager());
@@ -69,9 +75,9 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
             return;
 
         Guild guild = event.getGuild();
-        Music_GuildMusicManager guildMusicManager = getMusicManager(guild);
+        GuildMusicManager guildMusicManager = getMusicManager(guild);
         AudioPlayer player = guildMusicManager.player;
-        Music_TrackScheduler scheduler = guildMusicManager.scheduler;
+        TrackScheduler scheduler = guildMusicManager.scheduler;
 
         if (".play".equals(command[0])) {
             if (command.length == 1) //It is only the command to start playback (probably after pause)
@@ -80,7 +86,7 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
                     player.setPaused(false);
                     event.getChannel().sendMessage("Playback as been resumed.").queue();
                 } else if (player.getPlayingTrack() != null) {
-                    event.getChannel().sendMessage("Player is already playing!").queue();
+                    event.getChannel().sendMessage("OverwatchPlayer is already playing!").queue();
                 } else if (scheduler.queue.isEmpty()) {
                     event.getChannel().sendMessage("The current audio queue is empty! Add something to the queue first!").queue();
                 }
@@ -125,7 +131,7 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
                     int newVolume = Math.max(10, Math.min(100, Integer.parseInt(command[1])));
                     int oldVolume = player.getVolume();
                     player.setVolume(newVolume);
-                    event.getChannel().sendMessage("Player volume changed from `" + oldVolume + "` to `" + newVolume + "`").queue();
+                    event.getChannel().sendMessage("OverwatchPlayer volume changed from `" + oldVolume + "` to `" + newVolume + "`").queue();
                 } catch (NumberFormatException e) {
                     event.getChannel().sendMessage("`" + command[1] + "` is not a valid integer. (10 - 100)").queue();
                 }
@@ -143,7 +149,7 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
             }
         } else if (".repeat".equals(command[0])) {
             scheduler.setRepeating(!scheduler.isRepeating());
-            event.getChannel().sendMessage("Player was set to: **" + (scheduler.isRepeating() ? "repeat" : "not repeat") + "**").queue();
+            event.getChannel().sendMessage("OverwatchPlayer was set to: **" + (scheduler.isRepeating() ? "repeat" : "not repeat") + "**").queue();
         } else if (".reset".equals(command[0])) {
             synchronized (musicManagers) {
                 scheduler.queue.clear();
@@ -204,7 +210,7 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
         }
     }
 
-    private void loadAndPlay(Music_GuildMusicManager guildMusicManager, final MessageChannel channel, String url, final boolean addPlaylist) {
+    private void loadAndPlay(GuildMusicManager guildMusicManager, final MessageChannel channel, String url, final boolean addPlaylist) {
         final String trackUrl;
 
         //Strip <>'s that prevent discord from embedding link resources
@@ -218,7 +224,7 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
             public void trackLoaded(AudioTrack track) {
                 String msg = "Adding to queue: " + track.getInfo().title;
                 if (guildMusicManager.player.getPlayingTrack() == null)
-                    msg += "\nand the Player has started playing;";
+                    msg += "\nand the OverwatchPlayer has started playing;";
 
                 guildMusicManager.scheduler.queue(track);
                 channel.sendMessage(msg).queue();
@@ -255,14 +261,14 @@ public class Music_MusicPlayerControl extends ListenerAdapter {
         });
     }
 
-    private Music_GuildMusicManager getMusicManager(Guild guild) {
+    private GuildMusicManager getMusicManager(Guild guild) {
         String guildId = guild.getId();
-        Music_GuildMusicManager mng = musicManagers.get(guildId);
+        GuildMusicManager mng = musicManagers.get(guildId);
         if (mng == null) {
             synchronized (musicManagers) {
                 mng = musicManagers.get(guildId);
                 if (mng == null) {
-                    mng = new Music_GuildMusicManager(playerManager);
+                    mng = new GuildMusicManager(playerManager);
                     mng.player.setVolume(DEFAULT_VOLUME);
                     musicManagers.put(guildId, mng);
                 }

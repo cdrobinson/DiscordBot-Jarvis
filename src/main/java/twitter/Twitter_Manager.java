@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package twitter;
+
+import bot.utilities.ConfigManager;
 import com.google.common.collect.Lists;
 import com.twitter.hbc.ClientBuilder;
 import com.twitter.hbc.core.Client;
@@ -24,7 +31,7 @@ public class Twitter_Manager implements Runnable {
     private BlockingQueue<String> msgQueue;
     private TextChannel outputChannel;
 
-    Twitter_Manager(TextChannel outputChannel) {
+    public Twitter_Manager(TextChannel outputChannel) {
         ConfigManager cm = new ConfigManager();
         this.outputChannel = outputChannel;
         /* Set up your blocking queues: Be sure to size these properly based on expected TPS of your stream */

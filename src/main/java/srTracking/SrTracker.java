@@ -1,15 +1,24 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package srTracking;
+
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageChannel;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
+import java.awt.*;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-class SR_Manager implements Runnable {
+public class SrTracker implements Runnable {
     private MessageReceivedEvent event;
 
-    SR_Manager(MessageReceivedEvent event) {
+    public SrTracker(MessageReceivedEvent event) {
         this.event = event;
     }
 
@@ -60,7 +69,7 @@ class SR_Manager implements Runnable {
         }
         channel.sendMessage("Registering....").queue();
         channel.sendTyping().queue();
-        SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(contentString[1]);
+        OverwatchProfile overwatchProfile = new OverwatchProfile(contentString[1]);
         String userSR = overwatchProfile.getSR();
         event.getChannel().sendTyping().queue();
         try {
@@ -76,18 +85,16 @@ class SR_Manager implements Runnable {
                     Integer.valueOf(userSR);
                     break;
             }
-            String response = addToFile(event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator(),
-                    event.getAuthor().getId(), contentString[1], Integer.valueOf(userSR));
-            switch (response) {
-                case "added to file":
-                    channel.sendMessageFormat("You have registered %s as your battletag with a current SR of %s", contentString[1], userSR).queue();
-                    break;
-                case "already on file":
-                    channel.sendMessageFormat("You have already registered %s as your battletag", getBattletagFromDiscordID(event.getAuthor().getId())).queue();
-                    break;
-                default:
-                    channel.sendMessage("There was an error saving your registration to file. Please try again. If the problem persists, contact an admin so we can resolve the issue").queue();
-                    break;
+            String fullDiscordName = event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator();
+            MongoDbConnector mongoDbConnector = new MongoDbConnector();
+            boolean added = mongoDbConnector.addUserToDatabase(fullDiscordName, event.getAuthor().getId(),
+                    contentString[1], Integer.valueOf(userSR), overwatchProfile.getProfileURL(),
+                    overwatchProfile.getPortraitURL(), overwatchProfile.getRankIconURL());
+            mongoDbConnector.endConnection();
+            if (added) {
+                channel.sendMessageFormat("You have registered %s as your battletag with a current SR of %s", contentString[1], userSR).queue();
+            } else {
+                channel.sendMessageFormat("You have already registered %s as your battletag", getBattletagFromDiscordID(event.getAuthor().getId())).queue();
             }
         } catch (NumberFormatException e) {
             channel.sendMessageFormat("An error occured while looking up your SR: `%s`", userSR).queue();
@@ -97,7 +104,7 @@ class SR_Manager implements Runnable {
     private void postBattletagFromDiscordID(String[] contentString) {
         String authorID = event.getAuthor().getId();
         MessageChannel channel = event.getChannel();
-        MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
         if (contentString.length > 1) {
             String lookUpID;
             //checks if the member @'ed is using a nickname or not
@@ -109,10 +116,10 @@ class SR_Manager implements Runnable {
             }
             String lookupBattletag;
             event.getChannel().sendTyping().queue();
-            lookupBattletag = mongoDB_sr_manager.getBattletagByDiscordId(lookUpID);
+            lookupBattletag = mongoDbConnector.getBattletagByDiscordId(lookUpID);
             if (lookupBattletag ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
-                mongoDB_sr_manager.endConnection();
+                mongoDbConnector.endConnection();
                 return;
             }
             String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
@@ -120,30 +127,30 @@ class SR_Manager implements Runnable {
         } else {
             String authorBattletag;
             event.getChannel().sendTyping().queue();
-            authorBattletag = mongoDB_sr_manager.getBattletagByDiscordId(authorID);
+            authorBattletag = mongoDbConnector.getBattletagByDiscordId(authorID);
             if (authorBattletag != null) {
                 channel.sendMessage("Your stored battletag is currently: " + authorBattletag).queue();
             } else {
                 channel.sendMessage("Your battletag is not currently on file. Run ``.registerBattletag [battletag]`` to register it.").queue();
             }
         }
-        mongoDB_sr_manager.endConnection();
+        mongoDbConnector.endConnection();
     }
 
     private void postDiscordNameFromBattletag(String[] contentString) {
         MessageChannel channel = event.getChannel();
         if (contentString.length > 1) {
             event.getChannel().sendTyping().queue();
-            MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
-            String lookupDiscordID = mongoDB_sr_manager.getDiscordIdByBattletag(contentString[1]);
+            MongoDbConnector mongoDbConnector = new MongoDbConnector();
+            String lookupDiscordID = mongoDbConnector.getDiscordIdByBattletag(contentString[1]);
             if (lookupDiscordID ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
-                mongoDB_sr_manager.endConnection();
+                mongoDbConnector.endConnection();
                 return;
             }
             String lookUpName = event.getGuild().getMemberById(lookupDiscordID).getEffectiveName();
             channel.sendMessageFormat("%s's stored Discord name is %s", contentString[1], lookUpName).queue();
-            mongoDB_sr_manager.endConnection();
+            mongoDbConnector.endConnection();
         } else {
             channel.sendMessage("Make sure you enter a Battletag after the command").queue();
         }
@@ -151,10 +158,10 @@ class SR_Manager implements Runnable {
 
     private void updateSRDatabase() {
         MessageChannel channel = event.getChannel();
-        MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
-        List<String> allBattletags = mongoDB_sr_manager.getAllBattletags();
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        List<String> allBattletags = mongoDbConnector.getAllBattletags();
         for (String battletag : allBattletags) {
-            SR_OverwatchProfile overwatchProfile = new SR_OverwatchProfile(battletag);
+            OverwatchProfile overwatchProfile = new OverwatchProfile(battletag);
             String userSR = overwatchProfile.getSR();
             switch (userSR) {
                 case "This player has not placed yet":
@@ -164,92 +171,74 @@ class SR_Manager implements Runnable {
                     userSR = "Private";
                     break;
             }
-            Boolean updated = mongoDB_sr_manager.updateUsersSRByBattletag(battletag, userSR);
+            Boolean updated = mongoDbConnector.updateUserByBattletag(battletag, userSR,
+                    overwatchProfile.getProfileURL(), overwatchProfile.getPortraitURL(), overwatchProfile.getRankIconURL());
             if (!updated) {
                 channel.sendMessageFormat("There was an issue updating the SR for %s", battletag).queue();
             }
             event.getChannel().sendTyping().queue();
         }
         channel.sendMessage("All of the battletags have been updated").queue();
-        mongoDB_sr_manager.endConnection();
+        mongoDbConnector.endConnection();
+    }
+
+    private MessageEmbed getOverwatchEmbed(String battletag, String profileURL, String iconURL, String sr, String rankIconURL) {
+        EmbedBuilder embedBuilder = new EmbedBuilder();
+        embedBuilder.setColor(new Color(255, 156, 0));
+        embedBuilder.setAuthor(battletag.split("#")[0], profileURL);
+        embedBuilder.setThumbnail(iconURL);
+        embedBuilder.addField("Skill Rank:", sr, false);
+        embedBuilder.setFooter(battletag, rankIconURL);
+        return embedBuilder.build();
     }
 
     private void checkSR(String[] contentString){
-        String authorID = event.getAuthor().getId();
         MessageChannel channel = event.getChannel();
-        MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        String lookUpDiscordID;
+        Integer lookUpSR;
         if (contentString.length > 1) {
-            String lookUpID;
-            //checks if the member @'ed is using a nickname or not
-            String nicknameTag = contentString[1].substring(2, 3);
-            if (nicknameTag.equals("!")) {
-                lookUpID = contentString[1].substring(3, contentString[1].length() - 1);
-            } else {
-                lookUpID = contentString[1].substring(2, contentString[1].length() - 1);
-            }
-            Integer lookUpSR;
-            lookUpSR = mongoDB_sr_manager.getUserSrByDiscordId(lookUpID);
-            event.getChannel().sendTyping().queue();
-            if (lookUpSR ==  null) {
-                channel.sendMessageFormat("%s's SR is not on file.").queue();
-                mongoDB_sr_manager.endConnection();
-                return;
-            }
-            String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
-            channel.sendMessageFormat("%s's stored SR is currently %s", lookUpName, lookUpSR).queue();
+            lookUpDiscordID = event.getMessage().getMentionedUsers().get(0).getId();
         } else {
-            Integer authorSR;
-            authorSR = mongoDB_sr_manager.getUserSrByDiscordId(authorID);
-            event.getChannel().sendTyping().queue();
-            if (authorSR != null) {
-                channel.sendMessage("Your stored SR is currently: " + authorSR).queue();
-            } else {
-                channel.sendMessage("Your SR is not currently on file. Run ``.registerBattletag [battletag]`` to register it.").queue();
-            }
+            lookUpDiscordID = event.getAuthor().getId();
         }
-        mongoDB_sr_manager.endConnection();
+        lookUpSR = mongoDbConnector.getUserSrByDiscordId(lookUpDiscordID);
+        if (lookUpSR != null) {
+            DatabaseUserProfile databaseUserProfile = mongoDbConnector.getUserDataByDiscordId(lookUpDiscordID);
+            channel.sendMessage(getOverwatchEmbed(databaseUserProfile.getBattletag(), databaseUserProfile.getProfileURL(), databaseUserProfile.getIconURL(), databaseUserProfile.getSR().toString(), databaseUserProfile.getRankIconURL())).queue();
+        } else {
+            channel.sendMessage("That user has not registered their Battletag with me yet. They need to run ``.registerBattletag [battletag]`` to register it.").queue();
+        }
+        mongoDbConnector.endConnection();
     }
 
     private void getLeaderboard(){
-        MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
-        List<SR_DatabaseUser> databaseData = mongoDB_sr_manager.getFullDatabase();
-        Comparator<SR_DatabaseUser> databaseComparator = Comparator.comparing(SR_DatabaseUser::getSR);
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        List<DatabaseUserProfile> databaseData = mongoDbConnector.getFullDatabase();
+        Comparator<DatabaseUserProfile> databaseComparator = Comparator.comparing(DatabaseUserProfile::getSR);
         databaseData.sort(databaseComparator);
         Collections.reverse(databaseData);
         StringBuilder leaderboardString = new StringBuilder();
         leaderboardString.append("**=====================**\n");
         event.getChannel().sendTyping().queue();
-        for (SR_DatabaseUser user : databaseData) {
+        for (DatabaseUserProfile databaseUserProfile : databaseData) {
             leaderboardString
-                    .append(event.getGuild().getMemberById(user.getDiscordID()).getEffectiveName())
+                    .append(event.getGuild().getMemberById(databaseUserProfile.getDiscordID()).getEffectiveName())
                     .append("** | **")
-                    .append(user.getSR().toString())
+                    .append(databaseUserProfile.getSR().toString())
                     .append("** | **")
-                    .append(user.getBattletag())
+                    .append(databaseUserProfile.getBattletag())
                     .append("\n");
         }
         leaderboardString.append("**=====================**");
         event.getChannel().sendMessage(leaderboardString.toString()).queue();
-        mongoDB_sr_manager.endConnection();
-    }
-
-    private String addToFile(String userDiscordName, String userID, String battletag, Integer userSR) {
-        MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
-        boolean added = mongoDB_sr_manager.addUserToDatabase(userDiscordName, userID, battletag, userSR);
-        if (added) {
-            System.out.printf("%s has registered %s as their Battletag with an SR of %s", userID, battletag, userSR);
-            mongoDB_sr_manager.endConnection();
-            return "added to file";
-        } else {
-            mongoDB_sr_manager.endConnection();
-            return "already on file";
-        }
+        mongoDbConnector.endConnection();
     }
 
     private String getBattletagFromDiscordID(String discordID) {
-        MongoDB_SR_Manager mongoDB_sr_manager = new MongoDB_SR_Manager();
-        String battletag = mongoDB_sr_manager.getBattletagByDiscordId(discordID);
-        mongoDB_sr_manager.endConnection();
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        String battletag = mongoDbConnector.getBattletagByDiscordId(discordID);
+        mongoDbConnector.endConnection();
         return battletag;
     }
 }

@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package commandParsers;
+
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Game;
@@ -6,9 +12,9 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.List;
 
-class AdminCommands {
+public class AdminCommandParser {
 
-    void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event) {
+    public void parseCommand(JDA jdaApi, String content, MessageReceivedEvent event) {
         MessageChannel channel = event.getChannel();
         switch (content) {
             case "!say":
