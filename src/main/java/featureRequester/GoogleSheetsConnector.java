@@ -4,6 +4,7 @@
 
 package featureRequester;
 
+import bot.utilities.ConfigManager;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;
@@ -23,9 +24,9 @@ class GoogleSheetsConnector {
     private static final String detailsRange = "FeatureRequests!E1:H1";
 
     GoogleSheetsConnector(){
+        spreadsheetId = new ConfigManager().getProperty("featureRequestSheetId");
         Client gsManager = new Client();
         service = gsManager.getSheet();
-        spreadsheetId = gsManager.getSpreadsheetId();
     }
 
     List<Request> getAllFeatureRequests(){

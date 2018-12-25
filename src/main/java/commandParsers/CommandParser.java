@@ -4,152 +4,118 @@
 
 package commandParsers;
 
+import bot.fun.MemeCommands;
+import bot.utilities.ConfigManager;
 import bot.utilities.UserInputManager;
-import bot.utilities.Util_FileManager;
-import bot.utilities.Util_HelpMessageBuilder;
+import bot.utilities.HelpMessageBuilder;
+import featureRequester.FeatureRequester;
+import frontline.BsuChecker;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.MessageBuilder;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.Role;
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
-import srTracking.OverwatchProfile;
+import srTracking.SrTracker;
 
-import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 
 public class CommandParser {
 
+    private final MessageReceivedEvent messageReceivedEvent;
+    private final MessageChannel messageChannel;
+    private final String message;
+    private final String commandPrefix;
 
-    public CommandParser() {
+    public CommandParser(MessageReceivedEvent event, String commandPrefix) {
+        this.commandPrefix = commandPrefix;
+        this.messageReceivedEvent = event;
+        this.messageChannel = messageReceivedEvent.getChannel();
+        this.message = messageReceivedEvent.getMessage().getContentRaw();
     }
 
-    public void parseCommand(JDA jdaApi, String contentString, MessageReceivedEvent event) {
-        String lcContent = contentString.toLowerCase();
-        Util_FileManager fileManager = new Util_FileManager();
-        String[] contentList = contentString.split(" ");
-        String command = contentList[0].toLowerCase();
-        MessageChannel channel = event.getChannel();
+    public void parseCommand(JDA jdaApi) {
+        List<String> messageList = Arrays.asList(Arrays.asList(message.split(commandPrefix)).get(1).split(" "));
+        String command = messageList.get(0);
+        List<String> commandParameters = messageList.subList(1, messageList.size());
 
+        if (messageChannel.getName().equals(new ConfigManager().getProperty("srTrackingChannelName")) || messageChannel.getName().equals("bot_stuff")) {
+            Thread srTrackerThread = new Thread(new SrTracker(messageReceivedEvent));
+            srTrackerThread.start();
+        }
+        if (messageChannel.getName().equals(new ConfigManager().getProperty("featureRequestChannelName"))) {
+            Thread featureRequestThread = new Thread(new FeatureRequester(messageReceivedEvent));
+            featureRequestThread.start();
+        }
+        //Global commands go below all the if checks
+        Thread memesThread = new Thread(new MemeCommands(messageReceivedEvent, command));
+        memesThread.start();
+
+        //Basic default commands
         switch (command) {
-            case "!ping":
-                channel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();
+            case "ping":
+                messageChannel.sendMessage("Pong! `" + jdaApi.getPing() + "`").queue();
                 break;
-            case "!bing":
-                channel.sendMessage("Bong!").queue();
+            case "bing":
+                messageChannel.sendMessage("Bong!").queue();
                 break;
-            case "!help":
-                channel.sendMessage(Util_HelpMessageBuilder.getHelpMessage()).queue();
+            case "help":
+                messageChannel.sendMessage(HelpMessageBuilder.getHelpMessage()).queue();
                 break;
-            case "!scotland":
-                MessageBuilder scotlandBuilder = new MessageBuilder();
-                scotlandBuilder.setTTS(true);
-                scotlandBuilder.append("SCOTLAND FOREVER!!!");
-                channel.sendMessage(scotlandBuilder.build()).queue();
+            case "feed":
+                messageReceivedEvent.getMessage().addReaction("\uD83D\uDEE2").queue();
+                messageChannel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
                 break;
-            case "!allwomen":
-                MessageBuilder thotBuilder = new MessageBuilder();
-                thotBuilder.setTTS(true);
-                thotBuilder.append("If she breathes, she's a thot!");
-                channel.sendMessage("All women are queens!").queue();
-                channel.sendMessage(thotBuilder.build()).queue();
+            case "chirpchirp":
+                //Gives users the
+                BsuChecker.cardinalChecker(messageReceivedEvent);
                 break;
-            case "!cherrybomb":
-                channel.sendMessage("ch-ch-ch CHERRY BOMB!").queue();
-                channel.sendMessage(":cherries::cherries::cherries::cherries::cherries::cherries:").queue();
+            case "vote":
+                UserInputManager.createPoll(messageReceivedEvent);
                 break;
-            case "!damnitjerry":
-                File jerryPic = fileManager.getFile("jerryPic.jpg");
-                if (jerryPic != null) {
-                    channel.sendFile(jerryPic, "jerry.jpg").queue();
-                }
-                break;
-            case "!noice":
-                File noice = fileManager.getFile("noice.jpg");
-                if (noice != null) {
-                    channel.sendFile(noice, "noice.jpg").queue();
-                    MessageBuilder noiceBuilder = new MessageBuilder();
-                    noiceBuilder.setTTS(true);
-                    noiceBuilder.append("noice");
-                    channel.sendMessage(noiceBuilder.build()).queue();
-                }
-                break;
-            case "!wow":
-                File wowPic = fileManager.getFile("wow.jpg");
-                if (wowPic != null) {
-                    channel.sendFile(wowPic, "wow.jpg").queue();
-                }
-                break;
-            case "wow":
-                for (Message message : event.getChannel().getHistoryBefore(event.getMessageId(), 1).complete().getRetrievedHistory()) {
-                    message.addReaction(event.getGuild().getEmoteById("481569620118208512")).queue();
-                }
-                break;
-            case "gruhz":
-                channel.sendMessage("Fuck off, Oly").queue();
-                break;
-            case "!chirpchirp":
-                List<Guild> mutualGuilds = event.getMember().getUser().getMutualGuilds();
-                for (Guild guild : mutualGuilds) {
-                    if (guild.getId().equals("260565533575872512")) {
-                        List<Role> userRoles = guild.getMemberById(event.getMember().getUser().getId()).getRoles();
-                        for (Role role : userRoles) {
-                            if (role.getId().equals("443151138062073866")) {
-                                event.getGuild().getController().addSingleRoleToMember(event.getMember(), event.getGuild().getRoleById("451495511724130305")).queue();
-                            }
-                        }
-                    }
-                }
-                break;
-            case "!vote":
-                UserInputManager.createPoll(event);
-                break;
-            case "!feed":
-                event.getMessage().addReaction("\uD83D\uDEE2").queue();
-                channel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
-                break;
-            case "!test":
-                new OverwatchProfile("Manofvault#1415");
-                new OverwatchProfile("Solitary#11979");
-                /*EmbedBuilder embedBuilder = new EmbedBuilder();
-                embedBuilder.setColor(Color.YELLOW);
-                embedBuilder.setAuthor("BattlemanMK2", "https://playoverwatch.com/en-us/career/pc/Battlemanmk2-1251");
-                //embedBuilder.setTitle("Overwatch Profile Report", "https://playoverwatch.com/en-us/career/pc/Battlemanmk2-1251");
-                //embedBuilder.setDescription("Here is a breakdown of BattlemanMK2's SR");
-                embedBuilder.setThumbnail("https://d15f34w2p8l1cc.cloudfront.net/overwatch/155a82e7279318dc60344907aed290f2ea4c4387e73285659969668939979cfa.png");
-                embedBuilder.addField("SR", "3000", false);
-                embedBuilder.setFooter("Battlemanmk2#1251", "https://d1u1mce87gyfbn.cloudfront.net/game/rank-icons/rank-PlatinumTier.png");
-                channel.sendMessage(embedBuilder.build()).queue();*/
+            case "test":
+
                 break;
             default:
                     break;
         }
 
-        //Multi word commands
-        if ("!no u".equals(lcContent) || "!no you".equals(lcContent)) {
-            File noYou = fileManager.getFile("noYou.png");
-            if (noYou != null) {
-                channel.sendFile(noYou, "noYou.png").queue();
+        //Administrator Commands
+        if (messageReceivedEvent.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+            //Simple commands
+            switch (command) {
+                case "say":
+                    StringBuilder whatToSay = new StringBuilder();
+                    for (String word : commandParameters) {
+                        whatToSay.append(word);
+                        whatToSay.append(" ");
+                    }
+                    messageReceivedEvent.getGuild().getTextChannelsByName("general", true).get(0).sendMessage(whatToSay).queue();
+                    System.out.printf("You told me to say this in #general chat: %s", whatToSay);
+                    break;
+                case "perms":
+                    List<Permission> authorPerms = messageReceivedEvent.getMember().getPermissions();
+                    StringBuilder permList = new StringBuilder();
+                    permList.append("```");
+                    for (Permission permission : authorPerms) {
+                        permList.append(permission.getName());
+                        permList.append("\r");
+                    }
+                    permList.append("```");
+                    this.messageChannel.sendMessage(permList.toString()).queue();
+                    break;
+                default:
+                    break;
             }
-        } else if ("no u".equals(lcContent) || "no you".equals(lcContent)) {
-            for (Message message : event.getChannel().getHistoryBefore(event.getMessageId(), 1).complete().getRetrievedHistory()) {
-                message.addReaction(event.getGuild().getEmoteById("481561171653165067")).queue();
-            }
-        }
-
-        //Inline commands
-        if (lcContent.contains("girl") || lcContent.contains("grill") || lcContent.contains("gorl") || lcContent.contains("gurl")) {
-            channel.sendMessage("If she breathes, she's a thot!").queue();
-        }
-        if (lcContent.contains("women")) {
-            channel.sendMessage("All women are queens").queue();
-        }
-        if (lcContent.contains("opinion")) {
-            File myOpinion = fileManager.getFile("myOpinion.png");
-            if (myOpinion != null) {
-                channel.sendFile(myOpinion, "myOpinion.png").queue();
+            //Commands with parameters
+            switch (command) {
+                case "playing":
+                    jdaApi.getPresence().setGame(Game.playing(messageList.get(1)));
+                    messageChannel.sendMessageFormat("I will start playing %s now.", messageList.get(1)).queue();
+                    break;
+                default:
+                    break;
             }
         }
     }
+
 }

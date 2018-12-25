@@ -19,14 +19,13 @@ import java.util.Set;
 
 
 public class Client {
-    private static final String APPLICATION_NAME = "Overwatch SR Bot";
+    private static final String APPLICATION_NAME = "Jarvis";
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final Set<String> SCOPES = Collections.singleton(SheetsScopes.SPREADSHEETS);
     private static Sheets service;
     //Stored in the resources folder
     private static final String CREDENTIALS_FILE_PATH = "/serviceAccountCredentials.json";
-    //This is the string between /d/ and /edit...
-    private static final String spreadsheetId = "1pnXicMQPwG0J4VSeJp_CjSMMiAe0D9FM7_cwTDFarek";
+    //Spreadsheet ID is the string between /d/ and /edit...
     //Must have editor access to the Google Sheet
     private static final String serviceAccountUser = "discordbot@overwatch-sr-bot-1542389554492.iam.gserviceaccount.com";
 
@@ -54,9 +53,5 @@ public class Client {
 
     public Sheets getSheet(){
         return service;
-    }
-
-    public String getSpreadsheetId() {
-        return spreadsheetId;
     }
 }

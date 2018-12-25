@@ -17,6 +17,7 @@ import java.util.List;
 
 public class SrTracker implements Runnable {
     private MessageReceivedEvent event;
+    private static String registerCommandSyntax = "`!registerBattletag battletag`";
 
     public SrTracker(MessageReceivedEvent event) {
         this.event = event;
@@ -64,7 +65,7 @@ public class SrTracker implements Runnable {
     private void registerBattletag(String[] contentString){
         MessageChannel channel = event.getChannel();
         if (contentString.length == 1) {
-            channel.sendMessage("Please enter a battletag after the command `.registerBattletag [battletag]`").queue();
+            channel.sendMessageFormat("Please enter a battletag after the command %s", registerCommandSyntax).queue();
             return;
         }
         channel.sendMessage("Registering....").queue();
@@ -131,7 +132,7 @@ public class SrTracker implements Runnable {
             if (authorBattletag != null) {
                 channel.sendMessage("Your stored battletag is currently: " + authorBattletag).queue();
             } else {
-                channel.sendMessage("Your battletag is not currently on file. Run ``.registerBattletag [battletag]`` to register it.").queue();
+                channel.sendMessageFormat("You have not registered your battletag with me. Please use %s to register.", registerCommandSyntax).queue();
             }
         }
         mongoDbConnector.endConnection();
@@ -207,7 +208,7 @@ public class SrTracker implements Runnable {
             DatabaseUserProfile databaseUserProfile = mongoDbConnector.getUserDataByDiscordId(lookUpDiscordID);
             channel.sendMessage(getOverwatchEmbed(databaseUserProfile.getBattletag(), databaseUserProfile.getProfileURL(), databaseUserProfile.getIconURL(), databaseUserProfile.getSR().toString(), databaseUserProfile.getRankIconURL())).queue();
         } else {
-            channel.sendMessage("That user has not registered their Battletag with me yet. They need to run ``.registerBattletag [battletag]`` to register it.").queue();
+            channel.sendMessageFormat("This user has not registered their battletag with me yet. They should run %s to register it.", registerCommandSyntax).queue();
         }
         mongoDbConnector.endConnection();
     }

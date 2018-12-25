@@ -6,7 +6,7 @@ package bot.utilities;
 
 import java.io.File;
 
-public class Util_FileManager {
+public class FileManager {
 
     public File getFile(String fileName) {
         try {
