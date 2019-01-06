@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Chris Robinson. All rights reserved.
  */
 
-package bot.fun;
+package fun;
 
 import bot.utilities.FileManager;
 import net.dv8tion.jda.core.entities.Message;
@@ -18,7 +18,7 @@ public class MemeInline implements Runnable{
     private final MessageReceivedEvent messageReceivedEvent;
     private final String messageContent;
 
-    public MemeInline(MessageReceivedEvent event) {
+    MemeInline(MessageReceivedEvent event) {
         this.messageReceivedEvent = event;
         this.messageChannel = event.getChannel();
         this.fileManager = new FileManager();

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Chris Robinson. All rights reserved.
  */
 
-package bot.fun;
+package fun;
 
 import bot.utilities.FileManager;
 import net.dv8tion.jda.core.MessageBuilder;
@@ -16,11 +16,13 @@ public class MemeCommands implements Runnable{
     private final MessageChannel messageChannel;
     private final String command;
     private final FileManager fileManager;
+    private final MessageReceivedEvent event;
 
-    public MemeCommands(MessageReceivedEvent event, String command) {
+    MemeCommands(MessageReceivedEvent event, String command) {
         this.messageChannel = event.getChannel();
         this.command = command;
         this.fileManager = new FileManager();
+        this.event = event;
     }
 
     private void parseCommands() {
@@ -70,6 +72,10 @@ public class MemeCommands implements Runnable{
                 if (noYou != null) {
                     messageChannel.sendFile(noYou, "noYou.png").queue();
                 }
+                break;
+            case "feed":
+                event.getMessage().addReaction("\uD83D\uDEE2").queue();
+                messageChannel.sendMessage("\uD83D\uDEE2 \uD83D\uDE00 \uD83D\uDE42 \uD83D\uDE16 \uD83D\uDCA9 \uD83D\uDE0C").queue();
                 break;
         }
     }

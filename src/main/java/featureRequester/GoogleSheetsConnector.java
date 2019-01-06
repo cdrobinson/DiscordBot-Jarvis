@@ -4,7 +4,7 @@
 
 package featureRequester;
 
-import bot.utilities.ConfigManager;
+import bot.configuration.ConfigManager;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.AppendValuesResponse;
 import com.google.api.services.sheets.v4.model.ValueRange;

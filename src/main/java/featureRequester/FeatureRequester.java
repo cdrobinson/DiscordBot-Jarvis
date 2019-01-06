@@ -4,7 +4,7 @@
 
 package featureRequester;
 
-import bot.utilities.ConfigManager;
+import bot.configuration.ConfigManager;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
@@ -18,7 +18,7 @@ public class FeatureRequester implements Runnable {
     private GoogleSheetsConnector gs_FRManager;
     private static final String headerMessage = "List of requested features:\n"; //⭕=Received | ✔=Added | ❌=Denied\n```\n";
 
-    public FeatureRequester(MessageReceivedEvent passedEvent) {
+    FeatureRequester(MessageReceivedEvent passedEvent) {
         this.event = passedEvent;
         this.gs_FRManager = new GoogleSheetsConnector();
     }
@@ -146,7 +146,6 @@ public class FeatureRequester implements Runnable {
             stringBuilder.append("\n");
         }
         stringBuilder.append("```");
-        System.out.println(stringBuilder.toString());
         return stringBuilder.toString();
     }
 

@@ -2,7 +2,7 @@
  * Copyright (c) 2018 Chris Robinson. All rights reserved.
  */
 
-package bot.utilities;
+package bot.configuration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +11,8 @@ import java.util.Properties;
 public class ConfigManager {
 
     private Properties prop;
+    private String guildId;
+    private String commandPrefix;
 
     public ConfigManager() {
         this.prop = new Properties();
@@ -25,6 +27,8 @@ public class ConfigManager {
             }
             //load a properties file from class path, inside static method
             prop.load(input);
+            this.guildId = getProperty("guildID");
+            this.commandPrefix = getProperty("commandPrefix");
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally{
@@ -40,5 +44,13 @@ public class ConfigManager {
 
     public String getProperty(String key) {
         return this.prop.getProperty(key);
+    }
+
+    public String getGuildId() {
+        return guildId;
+    }
+
+    public String getCommandPrefix() {
+        return commandPrefix;
     }
 }
