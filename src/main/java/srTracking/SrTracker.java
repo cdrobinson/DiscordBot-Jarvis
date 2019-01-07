@@ -11,6 +11,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,9 +19,11 @@ import java.util.List;
 public class SrTracker implements Runnable {
     private MessageReceivedEvent event;
     private static String registerCommandSyntax = "`!registerBattletag battletag`";
+    private static MongoDbConnector mongoDbConnector;
 
-    public SrTracker(MessageReceivedEvent event) {
+    SrTracker(MessageReceivedEvent event) {
         this.event = event;
+        mongoDbConnector = new MongoDbConnector();
     }
 
     @Override
@@ -60,6 +63,7 @@ public class SrTracker implements Runnable {
             default:
                 break;
         }
+        mongoDbConnector.endConnection();
     }
 
     private void registerBattletag(String[] contentString){
@@ -87,11 +91,9 @@ public class SrTracker implements Runnable {
                     break;
             }
             String fullDiscordName = event.getAuthor().getName() + "#" + event.getAuthor().getDiscriminator();
-            MongoDbConnector mongoDbConnector = new MongoDbConnector();
             boolean added = mongoDbConnector.addUserToDatabase(fullDiscordName, event.getAuthor().getId(),
                     contentString[1], Integer.valueOf(userSR), overwatchProfile.getProfileURL(),
                     overwatchProfile.getPortraitURL(), overwatchProfile.getRankIconURL());
-            mongoDbConnector.endConnection();
             if (added) {
                 channel.sendMessageFormat("You have registered %s as your battletag with a current SR of %s", contentString[1], userSR).queue();
             } else {
@@ -105,7 +107,6 @@ public class SrTracker implements Runnable {
     private void postBattletagFromDiscordID(String[] contentString) {
         String authorID = event.getAuthor().getId();
         MessageChannel channel = event.getChannel();
-        MongoDbConnector mongoDbConnector = new MongoDbConnector();
         if (contentString.length > 1) {
             String lookUpID;
             //checks if the member @'ed is using a nickname or not
@@ -120,7 +121,6 @@ public class SrTracker implements Runnable {
             lookupBattletag = mongoDbConnector.getBattletagByDiscordId(lookUpID);
             if (lookupBattletag ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
-                mongoDbConnector.endConnection();
                 return;
             }
             String lookUpName = event.getGuild().getMemberById(lookUpID).getEffectiveName();
@@ -135,14 +135,12 @@ public class SrTracker implements Runnable {
                 channel.sendMessageFormat("You have not registered your battletag with me. Please use %s to register.", registerCommandSyntax).queue();
             }
         }
-        mongoDbConnector.endConnection();
     }
 
     private void postDiscordNameFromBattletag(String[] contentString) {
         MessageChannel channel = event.getChannel();
         if (contentString.length > 1) {
             event.getChannel().sendTyping().queue();
-            MongoDbConnector mongoDbConnector = new MongoDbConnector();
             String lookupDiscordID = mongoDbConnector.getDiscordIdByBattletag(contentString[1]);
             if (lookupDiscordID ==  null) {
                 channel.sendMessageFormat("%s's SR is not on file.").queue();
@@ -151,7 +149,6 @@ public class SrTracker implements Runnable {
             }
             String lookUpName = event.getGuild().getMemberById(lookupDiscordID).getEffectiveName();
             channel.sendMessageFormat("%s's stored Discord name is %s", contentString[1], lookUpName).queue();
-            mongoDbConnector.endConnection();
         } else {
             channel.sendMessage("Make sure you enter a Battletag after the command").queue();
         }
@@ -159,7 +156,6 @@ public class SrTracker implements Runnable {
 
     private void updateSRDatabase() {
         MessageChannel channel = event.getChannel();
-        MongoDbConnector mongoDbConnector = new MongoDbConnector();
         List<String> allBattletags = mongoDbConnector.getAllBattletags();
         for (String battletag : allBattletags) {
             OverwatchProfile overwatchProfile = new OverwatchProfile(battletag);
@@ -180,7 +176,6 @@ public class SrTracker implements Runnable {
             event.getChannel().sendTyping().queue();
         }
         channel.sendMessage("All of the battletags have been updated").queue();
-        mongoDbConnector.endConnection();
     }
 
     private MessageEmbed getOverwatchEmbed(String battletag, String profileURL, String iconURL, String sr, String rankIconURL) {
@@ -195,7 +190,6 @@ public class SrTracker implements Runnable {
 
     private void checkSR(String[] contentString){
         MessageChannel channel = event.getChannel();
-        MongoDbConnector mongoDbConnector = new MongoDbConnector();
         String lookUpDiscordID;
         Integer lookUpSR;
         if (contentString.length > 1) {
@@ -210,13 +204,21 @@ public class SrTracker implements Runnable {
         } else {
             channel.sendMessageFormat("This user has not registered their battletag with me yet. They should run %s to register it.", registerCommandSyntax).queue();
         }
-        mongoDbConnector.endConnection();
     }
 
     private void getLeaderboard(){
-        MongoDbConnector mongoDbConnector = new MongoDbConnector();
         List<DatabaseUserProfile> databaseData = mongoDbConnector.getFullDatabase();
-        Comparator<DatabaseUserProfile> databaseComparator = Comparator.comparing(DatabaseUserProfile::getSR);
+        List<DatabaseUserProfile> usersToRemove = new ArrayList<>();
+        for (DatabaseUserProfile user : databaseData) {
+            String userSR = user.getSR().toString();
+            if (userSR.equals("Not Placed") || userSR.equals("Private")) {
+                usersToRemove.add(user);
+            }
+        }
+        for (DatabaseUserProfile user : usersToRemove) {
+            databaseData.remove(user);
+        }
+        Comparator<DatabaseUserProfile> databaseComparator = Comparator.comparing(databaseUserProfile -> Integer.valueOf(databaseUserProfile.getSR().toString()));
         databaseData.sort(databaseComparator);
         Collections.reverse(databaseData);
         StringBuilder leaderboardString = new StringBuilder();
@@ -226,20 +228,16 @@ public class SrTracker implements Runnable {
             leaderboardString
                     .append(event.getGuild().getMemberById(databaseUserProfile.getDiscordID()).getEffectiveName())
                     .append("** | **")
-                    .append(databaseUserProfile.getSR().toString())
+                    .append(databaseUserProfile.getSR())
                     .append("** | **")
                     .append(databaseUserProfile.getBattletag())
                     .append("\n");
         }
         leaderboardString.append("**=====================**");
         event.getChannel().sendMessage(leaderboardString.toString()).queue();
-        mongoDbConnector.endConnection();
     }
 
     private String getBattletagFromDiscordID(String discordID) {
-        MongoDbConnector mongoDbConnector = new MongoDbConnector();
-        String battletag = mongoDbConnector.getBattletagByDiscordId(discordID);
-        mongoDbConnector.endConnection();
-        return battletag;
+        return mongoDbConnector.getBattletagByDiscordId(discordID);
     }
 }

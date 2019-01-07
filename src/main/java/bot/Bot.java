@@ -1,3 +1,9 @@
+/*
+ * Copyright (c) 2018 Chris Robinson. All rights reserved.
+ */
+
+package bot;
+
 import bot.basics.MainListener;
 import bot.configuration.ConfigManager;
 import music.MusicPlayerControl;
@@ -12,9 +18,9 @@ import javax.security.auth.login.LoginException;
 public class Bot {
 
     private static final String botToken = "NDY5NzI1MzgyODU4MjQ0MDk5.DjL9jQ.NrmqdL4jUiyIknGAtdlpGU_w9_M";
-    private static final String defaultPlaying = "Minecraft VR";
 
     public static void main(String[] args) throws LoginException, InterruptedException {
+        ConfigManager cm = new ConfigManager();
         JDA api = new JDABuilder(AccountType.BOT).setToken(botToken).build().awaitReady();
         api.addEventListener(new MainListener(api));
         api.addEventListener(new MusicPlayerControl());
@@ -23,12 +29,8 @@ public class Bot {
         api.addEventListener(new fun.Listener());
         api.addEventListener(new frontline.Listener());
         api.setAutoReconnect(true);
-        api.getPresence().setGame(Game.playing(defaultPlaying));
-
-        ConfigManager cm = new ConfigManager();
+        api.getPresence().setGame(Game.playing(cm.getProperty("defaultPlaying")));
         Thread thread = new Thread(new Twitter_Manager(api.getGuildById(cm.getGuildId()).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
         thread.start();
     }
-
-
 }

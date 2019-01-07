@@ -82,7 +82,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>Bot</mainClass>
+                            <mainClass>bot.Bot</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -101,7 +101,7 @@
                     <archive>
                         <manifest>
                             <mainClass>
-                                Bot
+                                bot.Bot
                             </mainClass>
                         </manifest>
                     </archive>

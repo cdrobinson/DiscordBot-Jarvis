@@ -6,19 +6,21 @@ package frontline;
 
 import bot.configuration.ConfigManager;
 import bot.utilities.HelpMessageBuilder;
+import bot.utilities.UserInputManager;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class Listener extends ListenerAdapter {
 
     private final ConfigManager cm = new ConfigManager();
     private final String commandPrefix = cm.getCommandPrefix();
-
 
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
@@ -43,6 +45,37 @@ public class Listener extends ListenerAdapter {
                     break;
                 default:
                     break;
+            }
+            if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) {
+                List<String> messageList = Arrays.asList(Arrays.asList(message.split(commandPrefix)).get(1).split(" "));
+                List<String> commandParameters = messageList.subList(1, messageList.size());
+                switch (command) {
+                    case "say":
+                        StringBuilder whatToSay = new StringBuilder();
+                        for (String word : commandParameters) {
+                            whatToSay.append(word);
+                            whatToSay.append(" ");
+                        }
+                        event.getGuild().getTextChannelsByName("general", true).get(0).sendMessage(whatToSay).queue();
+                        System.out.printf("You told me to say this in #general chat: %s", whatToSay);
+                        break;
+                    case "perms":
+                        List<Permission> authorPerms = event.getMember().getPermissions();
+                        StringBuilder permList = new StringBuilder();
+                        permList.append("```");
+                        for (Permission permission : authorPerms) {
+                            permList.append(permission.getName());
+                            permList.append("\r");
+                        }
+                        permList.append("```");
+                        event.getChannel().sendMessage(permList.toString()).queue();
+                        break;
+                    case "vote":
+                        UserInputManager.createPoll(event);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }

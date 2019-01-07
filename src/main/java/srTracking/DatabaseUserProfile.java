@@ -9,19 +9,19 @@ class DatabaseUserProfile {
     private String DiscordName;
     private String DiscordID;
     private String Battletag;
-    private Integer SR;
+    private Object SR;
     private String ProfileURL;
     private String IconURL;
     private String RankIconURL;
 
-    DatabaseUserProfile(String discordName, String discordID, String battletag, Integer SR) {
+    DatabaseUserProfile(String discordName, String discordID, String battletag, Object SR) {
         this.DiscordID = discordID;
         this.Battletag = battletag;
         this.SR = SR;
         this.DiscordName = discordName;
     }
 
-    DatabaseUserProfile(String discordName, String discordID, String battletag, Integer SR, String profileURL, String iconURL, String rankIconURL) {
+    DatabaseUserProfile(String discordName, String discordID, String battletag, String SR, String profileURL, String iconURL, String rankIconURL) {
         this.DiscordID = discordID;
         this.Battletag = battletag;
         this.SR = SR;
@@ -39,7 +39,7 @@ class DatabaseUserProfile {
         return Battletag;
     }
 
-    Integer getSR() {
+    Object getSR() {
         return SR;
     }
 

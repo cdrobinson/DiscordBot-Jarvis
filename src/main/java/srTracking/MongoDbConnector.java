@@ -25,9 +25,8 @@ class MongoDbConnector {
     private MongoCollection<Document> collection;
 
     MongoDbConnector() {
-        this.client = new Client("mongodb+srv://Jarvis:XVM1nCrfotM7tP99@frontline-izf18.mongodb.net/test?retryWrites=true",
-                "Frontline", "SR");
-        this.collection = client.getCollection();
+        this.client = new Client();
+        this.collection = client.getCollection(client.getDatabase("Frontline"), "SR");
     }
 
     Boolean addUserToDatabase(String discordName, String discordID, String battletag, Integer sr,
@@ -95,7 +94,7 @@ class MongoDbConnector {
                     document.getString("Discord Name"),
                     document.getString("Discord ID"),
                     document.getString("Battletag"),
-                    document.getInteger("SR"),
+                    document.getString("SR"),
                     document.getString("Profile URL"),
                     document.getString("Portrait URL"),
                     document.getString("Rank Icon URL"));
@@ -112,7 +111,7 @@ class MongoDbConnector {
                     document.getString("Discord Name"),
                     document.getString("Discord ID"),
                     document.getString("Battletag"),
-                    document.getInteger("SR"));
+                    document.get("SR"));
             databaseData.add(databaseUserProfile);
         }
         return databaseData;

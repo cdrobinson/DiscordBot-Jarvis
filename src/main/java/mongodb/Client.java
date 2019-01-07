@@ -12,18 +12,20 @@ import org.bson.Document;
 
 public class Client {
 
-    private MongoCollection<Document> collection;
     private MongoClient mongoClient;
+    private static final String uriString = "mongodb+srv://Jarvis:XVM1nCrfotM7tP99@frontline-izf18.mongodb.net/test?retryWrites=true";
 
-    public Client(String uriString, String databaseName, String collectionName) {
+    public Client() {
         MongoClientURI uri = new MongoClientURI(uriString);
         this.mongoClient = new MongoClient(uri);
-        MongoDatabase database = mongoClient.getDatabase(databaseName);
-        this.collection = database.getCollection(collectionName);
     }
 
-    public MongoCollection<Document> getCollection() {
-        return collection;
+    public MongoCollection<Document> getCollection(MongoDatabase database, String collectionName) {
+        return database.getCollection(collectionName);
+    }
+
+    public MongoDatabase getDatabase(String databaseName) {
+        return mongoClient.getDatabase(databaseName);
     }
 
     public void endConnection() {
