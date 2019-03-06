@@ -131,7 +131,7 @@ public class MusicPlayerControl extends ListenerAdapter {
                     int newVolume = Math.max(10, Math.min(100, Integer.parseInt(command[1])));
                     int oldVolume = player.getVolume();
                     player.setVolume(newVolume);
-                    event.getChannel().sendMessage("OverwatchPlayer volume changed from `" + oldVolume + "` to `" + newVolume + "`").queue();
+                    event.getChannel().sendMessage("Volume changed from `" + oldVolume + "` to `" + newVolume + "`").queue();
                 } catch (NumberFormatException e) {
                     event.getChannel().sendMessage("`" + command[1] + "` is not a valid integer. (10 - 100)").queue();
                 }

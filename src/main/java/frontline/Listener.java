@@ -25,7 +25,7 @@ public class Listener extends ListenerAdapter {
     @Override
     public void onMessageReceived(MessageReceivedEvent event) {
         if (event.getAuthor().isBot()) return;
-        if (!event.getGuild().getId().equals(cm.getGuildId())) return;
+        if (!event.getGuild().getId().equals("237059614384848896")) return;
         String message = event.getMessage().getContentRaw();
         if (message.startsWith(commandPrefix)) {
             String command = message.split(commandPrefix)[1].toLowerCase();
@@ -82,8 +82,8 @@ public class Listener extends ListenerAdapter {
 
     @Override
     public void onGuildMemberJoin(GuildMemberJoinEvent event) {
-        if (!event.getGuild().getId().equals(cm.getGuildId())) return;
-        String welcomeMessage = "Welcome to the Frontline! Here are a list of my commands:\r" + HelpMessageBuilder.getHelpMessage();
+        if (!event.getGuild().getId().equals("237059614384848896")) return;
+        String welcomeMessage = "Welcome to the Frontline!";
         event.getMember().getUser().openPrivateChannel().queue((userPM) -> userPM.sendMessage(welcomeMessage).queue());
 
         //Checks if the new member is part of the Cardinal Esports discord server (260565533575872512) and if they have the BSU Student role (443151138062073866)

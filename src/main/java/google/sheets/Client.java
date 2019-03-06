@@ -47,7 +47,7 @@ public class Client {
             service = new Sheets.Builder(HTTP_TRANSPORT, JSON_FACTORY, credentialBuilder.build()).setApplicationName(APPLICATION_NAME).build();
         } catch (IOException | GeneralSecurityException e) {
             e.printStackTrace();
-            System.out.println("There was an error creating the google.sheets.Client");
+            System.out.println("There was an error creating the google.sheets.MongoDbClient");
         }
     }
 

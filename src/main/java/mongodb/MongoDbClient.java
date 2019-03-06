@@ -10,12 +10,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-public class Client {
+public class MongoDbClient {
 
     private MongoClient mongoClient;
-    private static final String uriString = "mongodb+srv://Jarvis:XVM1nCrfotM7tP99@frontline-izf18.mongodb.net/test?retryWrites=true";
+    private static final String uriString = "mongodb+srv://Jarvis:XVM1nCrfotM7tP99@frontline-izf18.mongodb.net/playScheduler?retryWrites=true";
 
-    public Client() {
+    public MongoDbClient() {
         MongoClientURI uri = new MongoClientURI(uriString);
         this.mongoClient = new MongoClient(uri);
     }

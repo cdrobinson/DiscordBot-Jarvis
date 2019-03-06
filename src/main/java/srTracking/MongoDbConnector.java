@@ -6,7 +6,7 @@ package srTracking;
 
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
-import mongodb.Client;
+import mongodb.MongoDbClient;
 import org.bson.Document;
 
 import java.util.ArrayList;
@@ -21,12 +21,12 @@ import static com.mongodb.client.model.Updates.set;
 
 class MongoDbConnector {
 
-    private Client client;
+    private MongoDbClient mongoDbClient;
     private MongoCollection<Document> collection;
 
     MongoDbConnector() {
-        this.client = new Client();
-        this.collection = client.getCollection(client.getDatabase("Frontline"), "SR");
+        this.mongoDbClient = new MongoDbClient();
+        this.collection = mongoDbClient.getCollection(mongoDbClient.getDatabase("Frontline"), "SR");
     }
 
     Boolean addUserToDatabase(String discordName, String discordID, String battletag, Integer sr,
@@ -94,7 +94,7 @@ class MongoDbConnector {
                     document.getString("Discord Name"),
                     document.getString("Discord ID"),
                     document.getString("Battletag"),
-                    document.getString("SR"),
+                    document.get("SR").toString(),
                     document.getString("Profile URL"),
                     document.getString("Portrait URL"),
                     document.getString("Rank Icon URL"));
@@ -118,6 +118,6 @@ class MongoDbConnector {
     }
 
     void endConnection() {
-        client.endConnection();
+        mongoDbClient.endConnection();
     }
 }

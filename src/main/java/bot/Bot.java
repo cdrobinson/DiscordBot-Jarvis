@@ -3,14 +3,13 @@
  */
 
 package bot;
-
 import bot.basics.MainListener;
 import bot.configuration.ConfigManager;
+import bot.utilities.NowPlayingScheduler;
 import music.MusicPlayerControl;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDABuilder;
-import net.dv8tion.jda.core.entities.Game;
 import twitter.Twitter_Manager;
 
 import javax.security.auth.login.LoginException;
@@ -23,14 +22,16 @@ public class Bot {
         ConfigManager cm = new ConfigManager();
         JDA api = new JDABuilder(AccountType.BOT).setToken(botToken).build().awaitReady();
         api.addEventListener(new MainListener(api));
+        api.addEventListener(new featureRequester.Listener());
+        api.addEventListener(new frontline.Listener());
+        api.addEventListener(new fun.Listener());
         api.addEventListener(new MusicPlayerControl());
         api.addEventListener(new srTracking.Listener());
-        api.addEventListener(new featureRequester.Listener());
-        api.addEventListener(new fun.Listener());
-        api.addEventListener(new frontline.Listener());
         api.setAutoReconnect(true);
-        api.getPresence().setGame(Game.playing(cm.getProperty("defaultPlaying")));
+        Thread nowPlayingThread = new Thread(new NowPlayingScheduler(api));
+        nowPlayingThread.start();
         Thread thread = new Thread(new Twitter_Manager(api.getGuildById(cm.getGuildId()).getTextChannelsByName(cm.getProperty("twitterOutputChannelName"), true).get(0)));
         thread.start();
+
     }
 }
