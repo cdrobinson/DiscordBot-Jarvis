@@ -5,7 +5,6 @@
 package frontline;
 
 import bot.configuration.ConfigManager;
-import bot.utilities.HelpMessageBuilder;
 import bot.utilities.UserInputManager;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
