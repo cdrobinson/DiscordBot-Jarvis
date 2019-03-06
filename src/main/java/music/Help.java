@@ -4,7 +4,7 @@
 
 package music;
 
-import bot.utilities.FunctionHelp;
+import bot.interactiveHelpMessage.FunctionHelp;
 
 public class Help extends FunctionHelp {
 

@@ -4,7 +4,7 @@
 
 package srTracking;
 
-import bot.utilities.FunctionHelp;
+import bot.interactiveHelpMessage.FunctionHelp;
 
 public class Help extends FunctionHelp {
     public Help() {

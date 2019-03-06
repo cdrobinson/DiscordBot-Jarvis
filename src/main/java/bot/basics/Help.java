@@ -4,15 +4,14 @@
 
 package bot.basics;
 
-import bot.utilities.FunctionHelp;
+import bot.interactiveHelpMessage.FunctionHelp;
 
-class Help extends FunctionHelp {
+public class Help extends FunctionHelp {
 
 
-    Help() {
+    public Help() {
         super("Basic Commands", "!ping: Pong! [current ping to bot in ms] \n" +
                 "!bing: Bong! \n" +
-                "!help: Shows you this message \n" +
-                "!vote [option1, option2, etc] \n");
+                "!help: Shows you this message \n");
     }
 }

@@ -22,6 +22,7 @@ public class Bot {
         ConfigManager cm = new ConfigManager();
         JDA api = new JDABuilder(AccountType.BOT).setToken(botToken).build().awaitReady();
         api.addEventListener(new MainListener(api));
+        api.addEventListener(new bot.interactiveHelpMessage.Listener());
         api.addEventListener(new featureRequester.Listener());
         api.addEventListener(new frontline.Listener());
         api.addEventListener(new fun.Listener());
