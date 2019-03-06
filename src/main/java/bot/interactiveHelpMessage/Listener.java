@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class Listener extends ListenerAdapter {
 
+    //TODO: Add table of contents functionality
+
     private ConfigManager cm = new ConfigManager();
     private String commandPrefix = cm.getCommandPrefix();
     private Map<String, Integer> existingHelpMessages = new HashMap<>();
