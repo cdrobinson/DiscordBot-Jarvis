@@ -53,4 +53,9 @@ public class ConfigManager {
     public String getCommandPrefix() {
         return commandPrefix;
     }
+
+    public String getBotToken() {
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        return mongoDbConnector.getBotToken();
+    }
 }
