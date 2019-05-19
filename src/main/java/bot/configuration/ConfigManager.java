@@ -56,6 +56,8 @@ public class ConfigManager {
 
     public String getBotToken() {
         MongoDbConnector mongoDbConnector = new MongoDbConnector();
-        return mongoDbConnector.getBotToken();
+        String botToken = mongoDbConnector.getBotToken();
+        mongoDbConnector.endConnection();
+        return botToken;
     }
 }

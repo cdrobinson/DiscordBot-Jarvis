@@ -24,7 +24,6 @@ class MongoDbConnector {
     }
 
     String getBotToken() {
-        ArrayList<String> nowPlayingList = new ArrayList<>();
         FindIterable<Document> foundSet = collection.find(eq("Function", "BotToken")).projection(include("Token"));
         String token = "";
         for (Document document : foundSet) {

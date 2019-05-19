@@ -19,14 +19,10 @@ public class Listener extends ListenerAdapter {
 
     private final ConfigManager cm = new ConfigManager();
     private String commandPrefix;
-    private HashMap<String, ReactionMessage> allReactionMessages = new HashMap<>();
+    private HashMap<String, ReactionMessage> allReactionMessages;
 
     public Listener() {
         this.commandPrefix = cm.getCommandPrefix();
-    }
-
-    @Override
-    public void onReady(ReadyEvent event) {
         MongoDbConnector mongoDbConnector = new MongoDbConnector();
         this.allReactionMessages = mongoDbConnector.getAllReactionMessages();
         mongoDbConnector.endConnection();
@@ -87,9 +83,7 @@ public class Listener extends ListenerAdapter {
 
                 break;
             case "testing":
-                event.getMessage().addReaction(event.getGuild().getEmoteById("523536842298097668")).queue();
-                MongoDbConnector mongoDbConnector = new MongoDbConnector();
-                mongoDbConnector.getAllReactionMessages();
+
                 break;
             default:
 
