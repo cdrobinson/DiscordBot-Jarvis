@@ -47,13 +47,17 @@ class ReactionMessage {
     }
 
     void addRoleToMessage(ReactionRole reactionRole) {
-        this.rolesList.put(reactionRole.getEmoteAsString(), reactionRole);
+        addRoleToMessageList(reactionRole);
         this.message = message.editMessage(build()).complete();
         if (reactionRole.isSnowFlakeEmote()) {
             message.addReaction(message.getGuild().getEmoteById(reactionRole.getEmoteID())).queue();
         } else {
             message.addReaction(reactionRole.getEmoteID()).queue();
         }
+    }
+
+    void addRoleToMessageList(ReactionRole reactionRole) {
+        this.rolesList.put(reactionRole.getEmoteAsString(), reactionRole);
     }
 
     void setMessage(Message message) {

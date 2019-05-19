@@ -21,11 +21,11 @@ public class Bot {
         JDA api = new JDABuilder(AccountType.BOT).setToken(cm.getBotToken()).build().awaitReady();
         api.addEventListener(new MainListener(api));
         api.addEventListener(new bot.interactiveHelpMessage.Listener());
-        api.addEventListener(new featureRequester.Listener());
+        //api.addEventListener(new featureRequester.Listener());
         api.addEventListener(new frontline.Listener());
         api.addEventListener(new fun.Listener());
         api.addEventListener(new MusicPlayerControl());
-        api.addEventListener(new srTracking.Listener());
+        //api.addEventListener(new srTracking.Listener());
         api.addEventListener(new reactionRole.Listener());
         api.setAutoReconnect(true);
         Thread nowPlayingThread = new Thread(new Scheduler(api));

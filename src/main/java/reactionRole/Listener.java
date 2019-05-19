@@ -6,6 +6,7 @@ package reactionRole;
 
 import bot.configuration.ConfigManager;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -22,6 +23,13 @@ public class Listener extends ListenerAdapter {
 
     public Listener() {
         this.commandPrefix = cm.getCommandPrefix();
+    }
+
+    @Override
+    public void onReady(ReadyEvent event) {
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        this.allReactionMessages = mongoDbConnector.getAllReactionMessages();
+        mongoDbConnector.endConnection();
     }
 
     @Override

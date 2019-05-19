@@ -9,7 +9,6 @@ import com.mongodb.client.MongoCollection;
 import mongodb.MongoDbClient;
 import org.bson.Document;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import static com.mongodb.client.model.Filters.eq;
@@ -47,7 +46,7 @@ class MongoDbConnector {
         }
     }
 
-    void getAllReactionMessages() {
+    HashMap<String, ReactionMessage> getAllReactionMessages() {
         HashMap<String, ReactionMessage> allReactionMessages = new HashMap<>();
         FindIterable<Document> foundSet = collection.find();
         for (Document document : foundSet) {
@@ -56,7 +55,6 @@ class MongoDbConnector {
             reactionMessage.setChannelID(document.get("ChannelID").toString());
 
             Document parentRoleListDocument = (Document) document.get("Roles");
-            ArrayList<ReactionRole> allReactionRoles = new ArrayList<>();
             for (Object roleObject : parentRoleListDocument.values()) {
                 Document roleDocument = (Document) roleObject;
                 ReactionRole reactionRole = new ReactionRole();
@@ -64,9 +62,11 @@ class MongoDbConnector {
                 reactionRole.setDescription(roleDocument.get("RoleDescription").toString());
                 reactionRole.setEmoteAsString(roleDocument.get("EmoteAsString").toString());
                 reactionRole.setEmoteID(roleDocument.get("EmoteID").toString());
-                allReactionRoles.add(reactionRole);
+                reactionMessage.addRoleToMessageList(reactionRole);
             }
+            allReactionMessages.put(reactionMessage.getMessageID(), reactionMessage);
         }
+        return allReactionMessages;
     }
 
     void endConnection() {
