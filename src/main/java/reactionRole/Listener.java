@@ -6,7 +6,6 @@ package reactionRole;
 
 import bot.configuration.ConfigManager;
 import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.ReadyEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -16,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Listener extends ListenerAdapter {
+
+    //TODO Add debug controls, make it super fool proof
 
     private final ConfigManager cm = new ConfigManager();
     private String commandPrefix;
@@ -55,7 +56,6 @@ public class Listener extends ListenerAdapter {
             }
             if (reactionMessage.getRolesList().containsKey(emoteAsString)) {
                 ReactionRole reactionRole = reactionMessage.getRolesList().get(emoteAsString);
-//                event.getGuild().getController().addSingleRoleToMember(event.getMember(), reactionRole.getRole()).queue();
                 event.getGuild().getController().addSingleRoleToMember(event.getMember(), event.getGuild().getRoleById(reactionRole.getRoleID())).queue();
             }
         }
@@ -65,25 +65,31 @@ public class Listener extends ListenerAdapter {
         String message = event.getMessage().getContentRaw().substring(1);
         List<String> messageList = Arrays.asList(message.split(" "));
         String[] messageSplitByQuotes = message.split("\"");
+        ReactionMessage reactionMessage = this.allReactionMessages.get(messageList.get(2));
         switch (messageList.get(0).toLowerCase()) {
             case "createmessage": //!createMessage #[channel] "[Title]" "[Description]"
                 TextChannel channel = event.getMessage().getMentionedChannels().get(0);
                 createMessage(channel, messageSplitByQuotes);
                 break;
             case "editmessage": //!editMessage #[channel] [messageId] "[Description]"
-
+                reactionMessage.setDescription(messageSplitByQuotes[1]);
+                reactionMessage.update(event.getChannel());
                 break;
             case "edittitle": //!editTitle #[channel] [messageId} "[Title]"
-
+                reactionMessage.setTitle(messageSplitByQuotes[1]);
+                reactionMessage.update(event.getChannel());
                 break;
             case "addrole": //!addRole #[channel] [messageId] [emote] @[role] "[Role Description]"
                 addRole(event, messageList.get(2), messageList, messageSplitByQuotes);
                 break;
-            case "removerole":
-
+            case "removerole": //!removeRole #[channel] [messageID] @[role]
+                removeRole(event, messageList.get(2));
                 break;
-            case "testing":
-
+            case "editroleemote":
+                break;
+            case "editroledescription":
+                break;
+            case "editcolor": //Will need RGB colors
                 break;
             default:
 
@@ -97,7 +103,6 @@ public class Listener extends ListenerAdapter {
         String messageDescription = messageSplitByQuotes[3];
         ReactionMessage reactionMessage = new ReactionMessage(messageTitle, messageDescription);
         Message postedMessage = channel.sendMessage(reactionMessage.build()).complete();
-        reactionMessage.setMessage(postedMessage);
         reactionMessage.setMessageID(postedMessage.getId());
         reactionMessage.setChannelID(channel.getId());
         this.allReactionMessages.put(reactionMessage.getMessageID(), reactionMessage);
@@ -126,8 +131,18 @@ public class Listener extends ListenerAdapter {
             reactionRole.setSnowFlakeStatus(true);
         }
         ReactionMessage reactionMessage = this.allReactionMessages.get(messageId);
-        reactionMessage.addRoleToMessage(reactionRole);
+        reactionMessage.addRoleToMessage(event.getChannel(), reactionRole);
         updateDatabse(reactionMessage);
+    }
+
+    private void removeRole(MessageReceivedEvent event, String messageId) {
+        ReactionMessage reactionMessage = this.allReactionMessages.get(messageId);
+        List<Role> mentionedRoles = event.getMessage().getMentionedRoles();
+        if (!mentionedRoles.isEmpty()) {
+            reactionMessage.removeRole(event.getChannel(), mentionedRoles.get(0).getId());
+        } else {
+            System.out.println("There was no role mentioned in the command");
+        }
     }
 
     private void updateDatabse(ReactionMessage reactionMessage) {

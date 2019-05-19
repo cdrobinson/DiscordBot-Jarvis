@@ -6,6 +6,7 @@ package reactionRole;
 
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 
 import java.awt.*;
@@ -17,7 +18,6 @@ class ReactionMessage {
     private String title;
     private String description;
     private HashMap<String, ReactionRole> rolesList = new HashMap<>();
-    private Message message;
     private String channelID;
 
     ReactionMessage(String messageTitle, String messageDescription) {
@@ -46,9 +46,9 @@ class ReactionMessage {
         this.messageID = id;
     }
 
-    void addRoleToMessage(ReactionRole reactionRole) {
+    void addRoleToMessage(MessageChannel channel, ReactionRole reactionRole) {
         addRoleToMessageList(reactionRole);
-        this.message = message.editMessage(build()).complete();
+        Message message = channel.getMessageById(this.messageID).complete().editMessage(build()).complete();
         if (reactionRole.isSnowFlakeEmote()) {
             message.addReaction(message.getGuild().getEmoteById(reactionRole.getEmoteID())).queue();
         } else {
@@ -57,12 +57,9 @@ class ReactionMessage {
     }
 
     void addRoleToMessageList(ReactionRole reactionRole) {
-        this.rolesList.put(reactionRole.getEmoteAsString(), reactionRole);
+        this.rolesList.put(reactionRole.getRoleID(), reactionRole);
     }
 
-    void setMessage(Message message) {
-        this.message = message;
-    }
 
     String getMessageID() {
         return this.messageID;
@@ -80,11 +77,40 @@ class ReactionMessage {
         return this.title;
     }
 
+    void setTitle(String title) {
+        this.title = title;
+    }
+
     String getDescription() {
         return this.description;
     }
 
+    void setDescription(String description) {
+        this.description = description;
+    }
+
     String getChannelID() {
         return this.channelID;
+    }
+
+    void update(MessageChannel channel) {
+        Message message = channel.getMessageById(this.messageID).complete();
+        message.editMessage(build()).queue();
+        for (ReactionRole reactionRole : this.rolesList.values()) {
+            if (reactionRole.isSnowFlakeEmote()) {
+                message.addReaction(message.getGuild().getEmoteById(reactionRole.getEmoteID())).queue();
+            } else {
+                message.addReaction(reactionRole.getEmoteID()).queue();
+            }
+        }
+        MongoDbConnector mongoDbConnector = new MongoDbConnector();
+        mongoDbConnector.addReactionMessage(this);
+        mongoDbConnector.endConnection();
+    }
+
+    void removeRole(MessageChannel channel, String roleID) {
+        this.rolesList.remove(roleID);
+        channel.getMessageById(this.messageID).complete().clearReactions().complete();
+        update(channel);
     }
 }

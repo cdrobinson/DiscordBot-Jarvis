@@ -36,7 +36,7 @@ class MongoDbConnector {
                     .append("RoleDescription", reactionRole.getDescription())
                     .append("EmoteAsString", reactionRole.getEmoteAsString())
                     .append("EmoteID", reactionRole.getEmoteID());
-            roleListDocument.append(reactionRole.getRoleAsMention(), roleDocument);
+            roleListDocument.append(reactionRole.getRoleID(), roleDocument);
         }
         reactionMessageInformation.append("Roles", roleListDocument);
         if (collection.find(eq("MessageID", reactionMessage.getMessageID())).first() == null) {
