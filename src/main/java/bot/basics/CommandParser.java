@@ -37,6 +37,9 @@ class CommandParser {
                 break;
             case "playScheduler":
                 break;
+            case "testing":
+
+                break;
             default:
                     break;
         }

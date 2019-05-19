@@ -73,6 +73,24 @@ class ReactionMessage {
         return rolesList;
     }
 
+    boolean hasRoleByEmote(String emoteAsString) {
+        for (ReactionRole reactionRole : this.rolesList.values()) {
+            if (reactionRole.getEmoteID().equals(emoteAsString)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ReactionRole getRoleByEmote(String emoteAsString) {
+        for (ReactionRole reactionRole : this.rolesList.values()) {
+            if (reactionRole.getEmoteID().equals(emoteAsString)) {
+                return reactionRole;
+            }
+        }
+        return null;
+    }
+
     String getTitle() {
         return this.title;
     }

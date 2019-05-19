@@ -35,7 +35,8 @@ class MongoDbConnector {
             roleDocument.append("RoleID", reactionRole.getRoleID())
                     .append("RoleDescription", reactionRole.getDescription())
                     .append("EmoteAsString", reactionRole.getEmoteAsString())
-                    .append("EmoteID", reactionRole.getEmoteID());
+                    .append("EmoteID", reactionRole.getEmoteID())
+                    .append("SnowflakeStatus", reactionRole.isSnowFlakeEmote());
             roleListDocument.append(reactionRole.getRoleID(), roleDocument);
         }
         reactionMessageInformation.append("Roles", roleListDocument);
@@ -62,6 +63,7 @@ class MongoDbConnector {
                 reactionRole.setDescription(roleDocument.get("RoleDescription").toString());
                 reactionRole.setEmoteAsString(roleDocument.get("EmoteAsString").toString());
                 reactionRole.setEmoteID(roleDocument.get("EmoteID").toString());
+                reactionRole.setSnowFlakeStatus((Boolean) roleDocument.get("SnowflakeStatus"));
                 reactionMessage.addRoleToMessageList(reactionRole);
             }
             allReactionMessages.put(reactionMessage.getMessageID(), reactionMessage);
