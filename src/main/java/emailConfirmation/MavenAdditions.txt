@@ -1,0 +1,13 @@
+<dependency>
+<groupId>com.sun.mail</groupId>
+<artifactId>javax.mail</artifactId>
+<version>1.6.2</version>
+</dependency>
+
+#EmailConfirmation Settings
+email_from =
+email_password =
+##Need to get an application password from the email if using Google
+confirmedRoleID =
+ConfirmedDatabase =
+ConfirmedCollection =

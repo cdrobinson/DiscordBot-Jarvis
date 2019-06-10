@@ -6,6 +6,7 @@ package bot;
 import bot.basics.MainListener;
 import bot.configuration.ConfigManager;
 import bot.utilities.nowPlayingScheduler.Scheduler;
+import easyModerator.Listener;
 import music.MusicPlayerControl;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -27,6 +28,7 @@ public class Bot {
         api.addEventListener(new MusicPlayerControl());
         //api.addEventListener(new srTracking.Listener());
         api.addEventListener(new reactionRole.Listener());
+        api.addEventListener(new Listener());
         api.setAutoReconnect(true);
         Thread nowPlayingThread = new Thread(new Scheduler(api));
         nowPlayingThread.start();
